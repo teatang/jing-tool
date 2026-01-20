@@ -1,13 +1,14 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
-import { join } from 'path'
+import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
+import { join, basename, dirname } from 'path'
+import { promises as fs } from 'fs'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 1200,
+    height: 800,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -35,12 +36,100 @@ function createWindow(): void {
   }
 }
 
+// 文件相关 IPC 处理
+ipcMain.handle('select-folder', async () => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openDirectory']
+  })
+  if (!result.canceled && result.filePaths.length > 0) {
+    return result.filePaths[0]
+  }
+  return null
+})
+
+ipcMain.handle('read-dir', async (_, dirPath: string) => {
+  try {
+    const entries = await fs.readdir(dirPath, { withFileTypes: true })
+    return entries.map((entry) => ({
+      name: entry.name,
+      isDirectory: entry.isDirectory(),
+      path: join(dirPath, entry.name)
+    }))
+  } catch {
+    return []
+  }
+})
+
+ipcMain.handle('rename-file', async (_, oldPath: string, newPath: string) => {
+  try {
+    await fs.rename(oldPath, newPath)
+    return { success: true }
+  } catch (error) {
+    return { success: false, error: String(error) }
+  }
+})
+
+ipcMain.handle('batch-rename', async (_, files: Array<{ path: string; newName: string }>) => {
+  const results: Array<{ path: string; success: boolean; error?: string }> = []
+  for (const file of files) {
+    try {
+      const newPath = join(dirname(file.path), file.newName)
+      await fs.rename(file.path, newPath)
+      results.push({ path: file.path, success: true })
+    } catch (error) {
+      results.push({ path: file.path, success: false, error: String(error) })
+    }
+  }
+  return results
+})
+
+ipcMain.handle('search-files', async (_, dir: string, keyword: string) => {
+  const results: Array<{ name: string; path: string }> = []
+
+  async function search(currentDir: string): Promise<void> {
+    try {
+      const entries = await fs.readdir(currentDir, { withFileTypes: true })
+      for (const entry of entries) {
+        const fullPath = join(currentDir, entry.name)
+        if (entry.name.includes(keyword)) {
+          results.push({ name: entry.name, path: fullPath })
+        }
+        if (entry.isDirectory()) {
+          await search(fullPath)
+        }
+      }
+    } catch {
+      // 忽略权限错误
+    }
+  }
+
+  await search(dir)
+  return results
+})
+
+ipcMain.handle('delete-files', async (_, paths: string[]) => {
+  const results: Array<{ path: string; success: boolean; error?: string }> = []
+  for (const path of paths) {
+    try {
+      const stat = await fs.stat(path)
+      if (stat.isDirectory()) {
+        await fs.rm(path, { recursive: true, force: true })
+      } else {
+        await fs.unlink(path)
+      }
+      results.push({ path, success: true })
+    } catch (error) {
+      results.push({ path, success: false, error: String(error) })
+    }
+  }
+  return results
+})
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron')
+  electronApp.setAppUserModelId('com.jingtool')
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.

@@ -1,26 +1,170 @@
 <script setup lang="ts">
-import Versions from './components/Versions.vue'
+import { computed, onMounted } from 'vue'
+import { useRoute, useRouter, RouterView } from 'vue-router'
+import { useTheme } from './composables/useTheme'
+import {
+  Sunny,
+  Moon,
+  Monitor,
+  Connection,
+  Document,
+  Folder
+} from '@element-plus/icons-vue'
 
-const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
+const { themeMode, toggleTheme } = useTheme()
+const route = useRoute()
+const router = useRouter()
+
+const themeIcon = computed(() => {
+  switch (themeMode.value) {
+    case 'dark':
+      return Moon
+    case 'light':
+      return Sunny
+    default:
+      return Monitor
+  }
+})
+
+const themeText = computed(() => {
+  switch (themeMode.value) {
+    case 'dark':
+      return '深色'
+    case 'light':
+      return '浅色'
+    default:
+      return '跟随系统'
+  }
+})
+
+const stringTools = [
+  { name: 'Base64编解码', path: '/tools/string/base64' },
+  { name: 'URL编解码', path: '/tools/string/url' },
+  { name: 'JSON格式化', path: '/tools/string/json' },
+  { name: 'HTML格式化', path: '/tools/string/html' },
+  { name: 'SQL格式化', path: '/tools/string/sql' },
+  { name: '正则测试', path: '/tools/string/regex' }
+]
+
+const fileTools = [
+  { name: '批量重命名', path: '/tools/file/rename' },
+  { name: '文件搜索', path: '/tools/file/search' }
+]
+
+const navigateTo = (path: string) => {
+  router.push(path)
+}
 </script>
 
 <template>
-  <img alt="logo" class="logo" src="./assets/electron.svg" />
-  <div class="creator">Powered by electron-vite</div>
-  <div class="text">
-    Build an Electron app with
-    <span class="vue">Vue</span>
-    and
-    <span class="ts">TypeScript</span>
-  </div>
-  <p class="tip">Please try pressing <code>F12</code> to open the devTool</p>
-  <div class="actions">
-    <div class="action">
-      <a href="https://electron-vite.org/" target="_blank" rel="noreferrer">Documentation</a>
-    </div>
-    <div class="action">
-      <a target="_blank" rel="noreferrer" @click="ipcHandle">Send IPC</a>
-    </div>
-  </div>
-  <Versions />
+  <el-container class="app-container">
+    <el-aside width="220px" class="sidebar">
+      <div class="logo">
+        <el-icon :size="28"><Connection /></el-icon>
+        <span>jing-tool</span>
+      </div>
+
+      <el-scrollbar>
+        <el-menu
+          :default-active="route.path"
+          class="sidebar-menu"
+        >
+          <el-sub-menu index="string">
+            <template #title>
+              <el-icon><Document /></el-icon>
+              <span>字符串工具</span>
+            </template>
+            <el-menu-item
+              v-for="tool in stringTools"
+              :key="tool.path"
+              :index="tool.path"
+              :class="{ 'is-active': route.path === tool.path }"
+              @click="navigateTo(tool.path)"
+            >
+              {{ tool.name }}
+            </el-menu-item>
+          </el-sub-menu>
+
+          <el-sub-menu index="file">
+            <template #title>
+              <el-icon><Folder /></el-icon>
+              <span>文件工具</span>
+            </template>
+            <el-menu-item
+              v-for="tool in fileTools"
+              :key="tool.path"
+              :index="tool.path"
+              :class="{ 'is-active': route.path === tool.path }"
+              @click="navigateTo(tool.path)"
+            >
+              {{ tool.name }}
+            </el-menu-item>
+          </el-sub-menu>
+        </el-menu>
+      </el-scrollbar>
+
+      <div class="sidebar-footer">
+        <el-button
+          class="theme-btn"
+          :icon="themeIcon"
+          @click="toggleTheme"
+        >
+          {{ themeText }}
+        </el-button>
+      </div>
+    </el-aside>
+
+    <el-main class="main-content">
+      <RouterView />
+    </el-main>
+  </el-container>
 </template>
+
+<style scoped>
+.app-container {
+  height: 100vh;
+  width: 100vw;
+}
+
+.sidebar {
+  background-color: var(--el-menu-bg-color);
+  border-right: 1px solid var(--el-border-color-light);
+  display: flex;
+  flex-direction: column;
+}
+
+.logo {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--el-border-color-light);
+}
+
+.sidebar-menu {
+  flex: 1;
+  border-right: none;
+}
+
+.sidebar-menu :deep(.el-menu-item.is-active) {
+  background-color: var(--el-menu-hover-bg-color);
+}
+
+.sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid var(--el-border-color-light);
+}
+
+.theme-btn {
+  width: 100%;
+}
+
+.main-content {
+  padding: 20px;
+  background-color: var(--el-bg-color-page);
+  overflow: auto;
+}
+</style>
