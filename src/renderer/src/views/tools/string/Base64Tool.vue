@@ -3,15 +3,24 @@ import { ref } from 'vue'
 import { Lock, Unlock } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
+// 输入和输出文本
 const inputText = ref('')
 const outputText = ref('')
+// 当前模式：编码或解码
 const mode = ref<'encode' | 'decode'>('encode')
 
+/**
+ * 执行 Base64 编码或解码
+ * 编码：将文本转换为 Base64 格式
+ * 解码：将 Base64 还原为原始文本
+ */
 const process = (): void => {
   try {
     if (mode.value === 'encode') {
+      // 编码：使用浏览器原生 btoa 函数
       outputText.value = btoa(inputText.value)
     } else {
+      // 解码：使用浏览器原生 atob 函数
       outputText.value = atob(inputText.value)
     }
   } catch {
@@ -20,6 +29,10 @@ const process = (): void => {
   }
 }
 
+/**
+ * 切换编码/解码模式
+ * 同时交换输入和输出框的内容
+ */
 const swapMode = (): void => {
   mode.value = mode.value === 'encode' ? 'decode' : 'encode'
   const temp = inputText.value
@@ -27,11 +40,15 @@ const swapMode = (): void => {
   outputText.value = temp
 }
 
+// 清空输入和输出
 const clear = (): void => {
   inputText.value = ''
   outputText.value = ''
 }
 
+/**
+ * 复制结果到剪贴板
+ */
 const copyResult = async (): Promise<void> => {
   if (!outputText.value) return
   await navigator.clipboard.writeText(outputText.value)

@@ -3,9 +3,12 @@ import { ref } from 'vue'
 import { Minus, Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
+// 输入和输出文本
 const inputText = ref('')
 const outputText = ref('')
+// 格式化类型：格式化或压缩
 const formatType = ref<'format' | 'minify'>('format')
+// 缩进空格数
 const indentSize = ref(2)
 
 // SQL关键字列表

@@ -1,12 +1,21 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 
+/**
+ * 路由配置
+ * 使用 hash 模式以兼容 file:// 协议访问
+ */
+
+// 创建路由实例
 const router = createRouter({
+  // 使用 hash 模式（#），避免服务器配置问题
   history: createWebHashHistory(),
   routes: [
+    // 根路径重定向到 Base64 工具页面
     {
       path: '/',
       redirect: '/tools/string/base64'
     },
+    // 字符串工具路由组
     {
       path: '/tools/string',
       children: [
@@ -18,6 +27,7 @@ const router = createRouter({
         { path: 'regex', component: () => import('@renderer/views/tools/string/RegexTool.vue') }
       ]
     },
+    // 文件工具路由组
     {
       path: '/tools/file',
       children: [

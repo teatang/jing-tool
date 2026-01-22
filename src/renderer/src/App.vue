@@ -4,10 +4,12 @@ import { useRoute, useRouter, RouterView } from 'vue-router'
 import { useTheme } from './composables/useTheme'
 import { Sunny, Moon, Monitor, Connection, Document, Folder } from '@element-plus/icons-vue'
 
+// 获取主题状态和切换方法
 const { themeMode, toggleTheme } = useTheme()
 const route = useRoute()
 const router = useRouter()
 
+// 根据当前主题模式计算显示的图标
 const themeIcon = computed(() => {
   switch (themeMode.value) {
     case 'dark':
@@ -19,6 +21,7 @@ const themeIcon = computed(() => {
   }
 })
 
+// 根据当前主题模式计算显示的文本
 const themeText = computed(() => {
   switch (themeMode.value) {
     case 'dark':
@@ -30,6 +33,7 @@ const themeText = computed(() => {
   }
 })
 
+// 字符串工具列表
 const stringTools = [
   { name: 'Base64编解码', path: '/tools/string/base64' },
   { name: 'URL编解码', path: '/tools/string/url' },
@@ -39,11 +43,13 @@ const stringTools = [
   { name: '正则测试', path: '/tools/string/regex' }
 ]
 
+// 文件工具列表
 const fileTools = [
   { name: '批量重命名', path: '/tools/file/rename' },
   { name: '文件搜索', path: '/tools/file/search' }
 ]
 
+// 路由跳转方法
 const navigateTo = (path: string): void => {
   router.push(path)
 }

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Electron application with Vue 3 and TypeScript, built using electron-vite.
+Cross-platform desktop tool collection built with Electron, Vue 3, and TypeScript. Features include Base64/URL/JSON/HTML/SQL/Regex string tools and batch rename/file search file tools.
 
 ## Common Commands
 
@@ -18,6 +18,17 @@ pnpm build:linux      # Build Linux AppImage
 pnpm lint             # Run ESLint
 pnpm format           # Format with Prettier
 pnpm typecheck        # Type-check both main and renderer
+pnpm test             # Run tests in watch mode
+pnpm test:run         # Run tests once and exit
+pnpm test:ui          # Run tests with browser UI
+```
+
+## Project Commands After Changes
+
+After modifying code, always run:
+
+```bash
+pnpm format && pnpm lint && pnpm test
 ```
 
 ## Architecture
@@ -36,7 +47,25 @@ Three-part Electron structure:
 - Resources (icons) in `resources/`
 - Build configs in `build/`
 
+## UI Components
+
+- **Element Plus** - Main UI component library
+- **Element Plus Icons Vue** - Icon components
+
+## Testing
+
+- **Vitest** - Test framework
+- **Happy-dom** - DOM environment for tests
+- Test files located in `src/**/*.test.ts` and `src/**/*.spec.ts`
+
 ## TypeScript Configuration
 
 - `tsconfig.node.json` - Main/preload (Node.js globals like `__dirname`)
 - `tsconfig.web.json` - Renderer (browser globals)
+
+## Important Notes
+
+- Always use `label` instead of `value` for Element Plus `el-radio-button`
+- Use `router.push()` for navigation (not `router-link` or `router-mode`)
+- Icons: Use `Lock`/`Unlock` instead of non-existent `Encode`/`Decode`
+- Theme CSS variables import: `element-plus/theme-chalk/dark/css-vars.css`
