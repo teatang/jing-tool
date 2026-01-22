@@ -53,6 +53,7 @@ pnpm dev
 pnpm test          # 监听模式，开发时使用
 pnpm test:run      # 运行一次并退出（CI 环境）
 pnpm test:ui       # 浏览器 UI 界面运行测试
+pnpm test:main.    # 测试主进程代码
 ```
 
 ### 代码检查
