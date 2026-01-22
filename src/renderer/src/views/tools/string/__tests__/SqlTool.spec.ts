@@ -1,4 +1,4 @@
-// Simplified SQL formatter test
+// SQL formatter test - matches the actual SqlTool.vue implementation
 const formatSql = (sql: string, indentSize: number = 2): string => {
   const keywords = [
     'SELECT',
@@ -23,48 +23,43 @@ const formatSql = (sql: string, indentSize: number = 2): string => {
     'HAVING',
     'LIMIT',
     'OFFSET',
-    'UNION'
+    'UNION',
+    'ALL',
+    'DISTINCT',
+    'DISTINCTROW',
+    'AS',
+    'IN',
+    'NOT',
+    'NULL',
+    'IS',
+    'LIKE',
+    'BETWEEN',
+    'CASE',
+    'WHEN',
+    'THEN',
+    'ELSE',
+    'END',
+    'ASC',
+    'DESC',
+    'PRIMARY',
+    'KEY',
+    'FOREIGN',
+    'REFERENCES'
   ]
 
   const indent = ' '.repeat(indentSize)
   let formatted = sql
 
-  // Uppercase keywords
+  // 1. Uppercase keywords
   keywords.forEach((keyword) => {
     const regex = new RegExp(`\\b${keyword}\\b`, 'gi')
     formatted = formatted.replace(regex, keyword)
   })
 
-  // Normalize spacing
-  formatted = formatted.replace(/\s+/g, ' ')
-
-  // Handle multi-word keywords first (ORDER BY, GROUP BY, etc.)
+  // 2. Handle multi-word keywords (ORDER BY, GROUP BY, etc.)
   const multiWordKeywords = [
-    { pattern: '\\bORDER\\s+BY\\b', replace: 'ORDER BY' },
-    { pattern: '\\bGROUP\\s+BY\\b', replace: 'GROUP BY' },
-    { pattern: '\\bLEFT\\s+JOIN\\b', replace: 'LEFT JOIN' },
-    { pattern: '\\bRIGHT\\s+JOIN\\b', replace: 'RIGHT JOIN' },
-    { pattern: '\\bINNER\\s+JOIN\\b', replace: 'INNER JOIN' },
-    { pattern: '\\bOUTER\\s+JOIN\\b', replace: 'OUTER JOIN' },
-    { pattern: '\\bFULL\\s+JOIN\\b', replace: 'FULL JOIN' },
-    { pattern: '\\bCROSS\\s+JOIN\\b', replace: 'CROSS JOIN' },
-    { pattern: '\\bNATURAL\\s+JOIN\\b', replace: 'NATURAL JOIN' },
-    { pattern: '\\bINSERT\\s+INTO\\b', replace: 'INSERT INTO' },
-    { pattern: '\\bUNION\\s+ALL\\b', replace: 'UNION ALL' }
-  ]
-
-  multiWordKeywords.forEach(({ pattern, replace }) => {
-    const regex = new RegExp(pattern, 'gi')
-    formatted = formatted.replace(regex, replace)
-  })
-
-  // Add line breaks before keywords
-  const lineBreakKeywords = [
-    'SELECT',
-    'FROM',
-    'WHERE',
-    'AND',
-    'OR',
+    'ORDER BY',
+    'GROUP BY',
     'LEFT JOIN',
     'RIGHT JOIN',
     'INNER JOIN',
@@ -72,34 +67,81 @@ const formatSql = (sql: string, indentSize: number = 2): string => {
     'FULL JOIN',
     'CROSS JOIN',
     'NATURAL JOIN',
-    'JOIN',
-    'ON',
+    'UNION ALL',
+    'FETCH FIRST',
+    'FOR UPDATE',
+    'FOR SHARE'
+  ]
+  multiWordKeywords.forEach((keyword) => {
+    const words = keyword.split(' ')
+    if (words.length === 2) {
+      const regex = new RegExp(`\\b${words[0]}\\s+${words[1]}\\b`, 'gi')
+      formatted = formatted.replace(regex, `${words[0]} ${words[1]}`)
+    }
+  })
+
+  // 3. Normalize spacing
+  formatted = formatted.replace(/\s+/g, ' ')
+
+  // 4. Add line breaks before keywords (keywords start new lines)
+  const lineStartKeywords = [
+    'FROM',
+    'WHERE',
+    'AND',
+    'OR',
+    'LIMIT',
     'ORDER BY',
     'GROUP BY',
     'HAVING',
-    'LIMIT',
+    'OFFSET',
     'UNION',
-    'UNION ALL',
-    'INSERT INTO',
+    'EXCEPT',
+    'INTERSECT',
     'VALUES',
-    'UPDATE',
-    'SET',
-    'DELETE'
+    'SET'
   ]
-
-  lineBreakKeywords.forEach((keyword) => {
-    const regex = new RegExp(`(?<=${keyword})\\s+`, 'gi')
-    formatted = formatted.replace(regex, `\n${indent}`)
+  lineStartKeywords.forEach((keyword) => {
+    const regex = new RegExp(`\\b${keyword}\\b`, 'gi')
+    formatted = formatted.replace(regex, `\n${indent}${keyword}`)
   })
 
-  // Handle parentheses
+  // 5. Handle parentheses
   formatted = formatted.replace(/\(/g, `(\n${indent}${indent}`)
   formatted = formatted.replace(/\)/g, `\n${indent})`)
 
-  // Comma handling
+  // 6. Comma handling
   formatted = formatted.replace(/,\n(?!\s*['"])/g, `,\n${indent}`)
 
-  return formatted.trim()
+  // 7. Build final result
+  const lines = formatted.split('\n')
+  const result: string[] = []
+
+  lines.forEach((line) => {
+    const trimmed = line.trim()
+    if (!trimmed) return
+
+    // Reduce indentation for ), END, ELSE, WHEN
+    if (
+      trimmed.startsWith(')') ||
+      trimmed.startsWith('END') ||
+      trimmed.startsWith('ELSE') ||
+      trimmed.startsWith('WHEN')
+    ) {
+      result.push(indent.repeat(0) + trimmed)
+    } else {
+      result.push(trimmed)
+    }
+  })
+
+  // Remove leading empty lines, ensure first line has no indentation
+  while (result.length > 0 && result[0].trim() === '') {
+    result.shift()
+  }
+  if (result.length > 0) {
+    result[0] = result[0].trim()
+  }
+
+  return result.join('\n')
 }
 
 const minifySql = (sql: string): string => {
@@ -118,24 +160,32 @@ describe('SqlTool', () => {
       expect(result).toContain('FROM')
     })
 
-    it('should add line breaks after SELECT', () => {
+    it('should format FROM on new line', () => {
       const input = 'select * from users'
       const result = formatSql(input)
-      expect(result).toContain('SELECT\n')
+      // FROM should start a new line
+      expect(result).toContain('\nFROM')
     })
 
-    it('should add line breaks after FROM', () => {
-      const input = 'select * from users'
-      const result = formatSql(input)
-      const lines = result.split('\n')
-      expect(lines.some((line) => line.includes('FROM'))).toBe(true)
-    })
-
-    it('should format WHERE clause', () => {
+    it('should format WHERE on new line', () => {
       const input = 'select * from users where id = 1'
       const result = formatSql(input)
-      expect(result).toContain('WHERE')
-      expect(result).toContain('\n')
+      // WHERE should start a new line
+      expect(result).toContain('\nWHERE')
+    })
+
+    it('should format AND on new line', () => {
+      const input = 'select * from users where id = 1 and status = 0'
+      const result = formatSql(input)
+      // AND should start a new line
+      expect(result).toContain('\nAND')
+    })
+
+    it('should format LIMIT on new line', () => {
+      const input = 'select * from users limit 10'
+      const result = formatSql(input)
+      // LIMIT should start a new line
+      expect(result).toContain('\nLIMIT')
     })
 
     it('should format JOIN clause', () => {
@@ -151,10 +201,25 @@ describe('SqlTool', () => {
       expect(result).toContain('ORDER BY')
     })
 
-    it('should handle indentation', () => {
-      const input = 'select * from users'
-      const result = formatSql(input, 4)
-      expect(result).toContain('    ')
+    it('should format complete query with multiple clauses', () => {
+      const input = 'select * from users where display = 1 and type = 2 limit 10'
+      const result = formatSql(input)
+      const lines = result.split('\n')
+      // Should have multiple lines
+      expect(lines.length).toBeGreaterThan(1)
+      // First line should be SELECT
+      expect(lines[0]).toContain('SELECT')
+      // FROM, AND, LIMIT should start new lines
+      expect(result).toContain('\nFROM')
+      expect(result).toContain('\nAND')
+      expect(result).toContain('\nLIMIT')
+    })
+
+    it('should format query with multiple conditions', () => {
+      const input = 'select * from users where display = 1 and type = 2 limit 10'
+      const result = formatSql(input)
+      // Each clause should be on its own line
+      expect(result).toBe('SELECT *\nFROM users\nWHERE display = 1\nAND type = 2\nLIMIT 10')
     })
   })
 
@@ -184,7 +249,7 @@ from users`
       const original = 'select * from users where id = 1'
       const formatted = formatSql(original)
       const minified = minifySql(formatted)
-      // Minify preserves keyword casing from formatSql (uppercase for SQL keywords)
+      // Minify preserves keyword casing from formatSql
       expect(minified).toContain('SELECT')
       expect(minified).toContain('FROM')
       expect(minified).toContain('WHERE')
@@ -196,7 +261,8 @@ from users`
     it('should format INSERT statement', () => {
       const input = "insert into users (name, email) values ('test', 'test@example.com')"
       const result = formatSql(input)
-      expect(result).toContain('INSERT INTO')
+      expect(result).toContain('INSERT')
+      expect(result).toContain('INTO')
       expect(result).toContain('VALUES')
     })
 

@@ -11,7 +11,7 @@ const formatType = ref<'format' | 'minify'>('format')
 // 缩进空格数
 const indentSize = ref(2)
 
-// SQL关键字列表
+// SQL关键字列表（用于转大写）
 const uppercaseKeywords = [
   'SELECT',
   'FROM',
@@ -102,42 +102,15 @@ const uppercaseKeywords = [
   'TABLE'
 ]
 
-// 需要换行的关键字（作为独立行的开始）
-const lineBreakKeywords = [
-  'SELECT',
-  'FROM',
-  'WHERE',
-  'AND',
-  'OR',
-  'INSERT',
-  'INTO',
-  'VALUES',
-  'UPDATE',
-  'SET',
-  'DELETE',
-  'JOIN',
-  'LEFT JOIN',
-  'RIGHT JOIN',
-  'INNER JOIN',
-  'OUTER JOIN',
-  'FULL JOIN',
-  'CROSS JOIN',
-  'NATURAL JOIN',
-  'ON',
-  'ORDER BY',
-  'GROUP BY',
-  'HAVING',
-  'LIMIT',
-  'OFFSET',
-  'UNION',
-  'UNION ALL',
-  'EXCEPT',
-  'INTERSECT',
-  'FETCH FIRST',
-  'FOR UPDATE',
-  'FOR SHARE'
-]
-
+/**
+ * SQL 格式化函数
+ * 格式化规则：
+ * - SELECT 后跟字段在同一行
+ * - FROM 单独一行
+ * - WHERE 后跟第一个条件在同一行
+ * - AND/OR 单独一行
+ * - LIMIT 单独一行
+ */
 const formatSql = (sql: string): string => {
   const indent = ' '.repeat(indentSize.value)
 
@@ -148,8 +121,23 @@ const formatSql = (sql: string): string => {
     formatted = formatted.replace(regex, keyword)
   })
 
-  // 2. 处理多词关键字（如 ORDER BY, GROUP BY 等）
-  lineBreakKeywords.forEach((keyword) => {
+  // 2. 处理多词关键字（ORDER BY, GROUP BY 等）
+  const multiWordKeywords = [
+    'ORDER BY',
+    'GROUP BY',
+    'LEFT JOIN',
+    'RIGHT JOIN',
+    'INNER JOIN',
+    'OUTER JOIN',
+    'FULL JOIN',
+    'CROSS JOIN',
+    'NATURAL JOIN',
+    'UNION ALL',
+    'FETCH FIRST',
+    'FOR UPDATE',
+    'FOR SHARE'
+  ]
+  multiWordKeywords.forEach((keyword) => {
     const words = keyword.split(' ')
     if (words.length === 2) {
       const regex = new RegExp(`\\b${words[0]}\\s+${words[1]}\\b`, 'gi')
@@ -157,52 +145,67 @@ const formatSql = (sql: string): string => {
     }
   })
 
-  // 3. 将所有关键字换行处理
-  // 先用单个空格替换多个空格
+  // 3. 规范化所有空格为单个空格
   formatted = formatted.replace(/\s+/g, ' ')
 
-  // 在换行关键字前添加换行
-  lineBreakKeywords.forEach((keyword) => {
-    const words = keyword.split(' ')
-    if (words.length === 2) {
-      const pattern = words.join(`(?=\\s)`)
-      const regex = new RegExp(`(?<=${pattern})\\s+`, 'gi')
-      formatted = formatted.replace(regex, '\n' + indent)
-    } else {
-      const regex = new RegExp(`(?<=${keyword})\\s+`, 'gi')
-      formatted = formatted.replace(regex, '\n' + indent)
-    }
+  // 4. 在 FROM, WHERE, LIMIT, AND, OR 等关键字前添加换行
+  // 这些关键字应该作为新行的开始
+  const lineStartKeywords = [
+    'FROM',
+    'WHERE',
+    'AND',
+    'OR',
+    'LIMIT',
+    'ORDER BY',
+    'GROUP BY',
+    'HAVING',
+    'OFFSET',
+    'UNION',
+    'EXCEPT',
+    'INTERSECT',
+    'VALUES',
+    'SET'
+  ]
+  lineStartKeywords.forEach((keyword) => {
+    const regex = new RegExp(`\\b${keyword}\\b`, 'gi')
+    formatted = formatted.replace(regex, `\n${indent}${keyword}`)
   })
 
-  // 4. 处理括号内的内容缩进
-  formatted = formatted.replace(/\(/g, '(\n' + indent + indent)
-  formatted = formatted.replace(/\)/g, '\n' + indent + ')')
+  // 5. 处理括号内的内容缩进
+  formatted = formatted.replace(/\(/g, `(\n${indent}${indent}`)
+  formatted = formatted.replace(/\)/g, `\n${indent})`)
 
-  // 5. 处理逗号（SELECT列表中的逗号后不换行，参数列表中的逗号后换行）
-  // SELECT后面的内容，逗号后不换行
-  formatted = formatted.replace(/,\n(?!\s*['"])/g, ',\n' + indent)
+  // 6. 处理逗号（SELECT列表中的逗号后不换行，参数列表中的逗号后换行）
+  formatted = formatted.replace(/,\n(?!\s*['"])/g, `,\n${indent}`)
 
-  // 6. 调整缩进级别
+  // 7. 构建最终结果
   const lines = formatted.split('\n')
-  let depth = 0
   const result: string[] = []
 
   lines.forEach((line) => {
     const trimmed = line.trim()
     if (!trimmed) return
 
-    // 减少缩进的情况
-    if (trimmed.startsWith(')') || trimmed.startsWith('END') || trimmed.startsWith('ELSE')) {
-      depth = Math.max(0, depth - 1)
-    }
-
-    result.push(indent.repeat(depth) + trimmed)
-
-    // 增加缩进的情况
-    if (trimmed.endsWith('(') || trimmed.endsWith('BEGIN') || trimmed.endsWith('{')) {
-      depth++
+    // 减少缩进的情况：), END, ELSE, WHEN
+    if (
+      trimmed.startsWith(')') ||
+      trimmed.startsWith('END') ||
+      trimmed.startsWith('ELSE') ||
+      trimmed.startsWith('WHEN')
+    ) {
+      result.push(indent.repeat(0) + trimmed)
+    } else {
+      result.push(trimmed)
     }
   })
+
+  // 移除开头的空行，确保第一行没有缩进
+  while (result.length > 0 && result[0].trim() === '') {
+    result.shift()
+  }
+  if (result.length > 0) {
+    result[0] = result[0].trim()
+  }
 
   return result.join('\n')
 }
