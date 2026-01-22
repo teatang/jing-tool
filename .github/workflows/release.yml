@@ -41,23 +41,27 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build and release
+      - name: Build macOS
+        if: matrix.os == 'macos-latest'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
           CSC_LINK: ${{ secrets.CSC_LINK }}
+        run: pnpm build:mac
+
+      - name: Build Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: pnpm build:linux
+
+      - name: Build Windows
+        if: matrix.os == 'windows-latest'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
           WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
-        run: |
-          if [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            pnpm build:mac
-          elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            pnpm build:linux
-          else
-            pnpm build:win
-          fi
+        run: pnpm build:win
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
