@@ -34,6 +34,13 @@ const router = createRouter({
         { path: 'rename', component: () => import('@renderer/views/tools/file/RenameTool.vue') },
         { path: 'search', component: () => import('@renderer/views/tools/file/SearchTool.vue') }
       ]
+    },
+    // 游戏
+    {
+      path: '/tools/game',
+      children: [
+        { path: 'tetris', component: () => import('@renderer/views/tools/game/TetrisGame.vue') }
+      ]
     }
   ]
 })

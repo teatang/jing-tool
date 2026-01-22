@@ -66,7 +66,7 @@ Three-part Electron structure:
 
 ## Important Notes
 
-- Always use `label` instead of `value` for Element Plus `el-radio-button`
+- Always use `value` instead of `label` for Element Plus `el-radio-button`
 - Use `router.push()` for navigation (not `router-link`)
 - Icons: Use `Lock`/`Unlock` instead of non-existent `Encode`/`Decode`
 - Theme CSS variables: `element-plus/theme-chalk/dark/css-vars.css`

@@ -53,8 +53,8 @@ const copyResult = async (): Promise<void> => {
     <div class="tool-content">
       <div class="tool-actions">
         <el-radio-group v-model="formatType">
-          <el-radio-button label="format"> 格式化 </el-radio-button>
-          <el-radio-button label="minify"> 压缩 </el-radio-button>
+          <el-radio-button value="format"> 格式化 </el-radio-button>
+          <el-radio-button value="minify"> 压缩 </el-radio-button>
         </el-radio-group>
         <el-button @click="clear">清空</el-button>
         <el-button type="primary" @click="process">处理</el-button>

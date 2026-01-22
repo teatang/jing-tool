@@ -3,6 +3,7 @@
 ## 概述
 
 `.github/workflows/release.yml` 配置了自动构建和发布流程：
+
 - 每次推送到 `main` 分支时自动构建
 - 打标签（`v*`）时自动发布 Release
 - 支持 macOS、Windows、Linux 三平台
@@ -16,24 +17,24 @@
 如果不需要代码签名，可以直接使用 ad-hoc 签名（仅供测试）：
 
 | Secret Name | Value | Required |
-|-------------|-------|----------|
-| (无) | - | 否 |
+| ----------- | ----- | -------- |
+| (无)        | -     | 否       |
 
 ### macOS 签名（正式发布需要）
 
-| Secret Name | Description |
-|-------------|-------------|
-| `APPLE_ID` | Apple ID 邮箱 |
+| Secret Name                   | Description                            |
+| ----------------------------- | -------------------------------------- |
+| `APPLE_ID`                    | Apple ID 邮箱                          |
 | `APPLE_APP_SPECIFIC_PASSWORD` | 应用专用密码（appleid.apple.com 生成） |
-| `CSC_LINK` | 开发者证书（.p12 文件 base64 编码） |
-| `CSC_KEY_PASSWORD` | 证书密码 |
+| `CSC_LINK`                    | 开发者证书（.p12 文件 base64 编码）    |
+| `CSC_KEY_PASSWORD`            | 证书密码                               |
 
 ### Windows 签名
 
-| Secret Name | Description |
-|-------------|-------------|
-| `WIN_CSC_LINK` | Windows 代码签名证书（.p12 或 .pfx base64 编码） |
-| `WIN_CSC_KEY_PASSWORD` | 证书密码 |
+| Secret Name            | Description                                      |
+| ---------------------- | ------------------------------------------------ |
+| `WIN_CSC_LINK`         | Windows 代码签名证书（.p12 或 .pfx base64 编码） |
+| `WIN_CSC_KEY_PASSWORD` | 证书密码                                         |
 
 ## 生成证书 base64 编码
 

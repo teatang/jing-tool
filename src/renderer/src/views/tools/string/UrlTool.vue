@@ -49,11 +49,11 @@ const copyResult = async (): Promise<void> => {
     <div class="tool-content">
       <div class="tool-actions">
         <el-radio-group v-model="mode">
-          <el-radio-button label="encode">
+          <el-radio-button value="encode">
             <el-icon><Link /></el-icon>
             编码
           </el-radio-button>
-          <el-radio-button label="decode">
+          <el-radio-button value="decode">
             <el-icon><Connection /></el-icon>
             解码
           </el-radio-button>

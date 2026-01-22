@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useRoute, useRouter, RouterView } from 'vue-router'
 import { useTheme } from './composables/useTheme'
-import { Sunny, Moon, Monitor, Connection, Document, Folder } from '@element-plus/icons-vue'
+import { Sunny, Moon, Monitor, Connection, Document, Folder, Grid } from '@element-plus/icons-vue'
 
 // 获取主题状态和切换方法
 const { themeMode, toggleTheme } = useTheme()
@@ -49,6 +49,9 @@ const fileTools = [
   { name: '文件搜索', path: '/tools/file/search' }
 ]
 
+// 游戏列表
+const gameTools = [{ name: '俄罗斯方块', path: '/tools/game/tetris' }]
+
 // 路由跳转方法
 const navigateTo = (path: string): void => {
   router.push(path)
@@ -88,6 +91,22 @@ const navigateTo = (path: string): void => {
             </template>
             <el-menu-item
               v-for="tool in fileTools"
+              :key="tool.path"
+              :index="tool.path"
+              :class="{ 'is-active': route.path === tool.path }"
+              @click="navigateTo(tool.path)"
+            >
+              {{ tool.name }}
+            </el-menu-item>
+          </el-sub-menu>
+
+          <el-sub-menu index="game">
+            <template #title>
+              <el-icon><Grid /></el-icon>
+              <span>休闲游戏</span>
+            </template>
+            <el-menu-item
+              v-for="tool in gameTools"
               :key="tool.path"
               :index="tool.path"
               :class="{ 'is-active': route.path === tool.path }"
