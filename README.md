@@ -88,29 +88,63 @@ pnpm build:linux        # 构建 Linux AppImage
 
 ```
 src/
-├── main/               # Electron 主进程
-│   └── index.ts        # BrowserWindow、生命周期、IPC 处理器
-├── preload/            # 预加载脚本
-│   └── index.ts        # contextBridge API 暴露
-└── renderer/src/       # Vue 3 前端
-    ├── App.vue         # 主应用布局
-    ├── composables/    # Vue 组合式函数（useTheme 等）
-    ├── router/         # Vue Router 路由配置
-    ├── views/          # 页面组件
-    │   └── tools/      # 工具页面（string/、file/）
-    └── main.ts         # Vue 应用初始化
+├── main/                    # Electron 主进程
+│   └── index.ts             # BrowserWindow、生命周期、IPC 处理器
+├── preload/                 # 预加载脚本
+│   └── index.ts             # contextBridge API 暴露（文件操作相关）
+├── renderer/src/            # Vue 3 前端
+│   ├── App.vue              # 主应用布局
+│   ├── components/          # 公共组件
+│   ├── composables/         # Vue 组合式函数（useTheme 等）
+│   ├── router/              # Vue Router 路由配置
+│   ├── views/               # 页面组件
+│   │   ├── tools/
+│   │   │   ├── string/      # 字符串工具
+│   │   │   │   ├── Base64Tool.vue
+│   │   │   │   ├── UrlTool.vue
+│   │   │   │   ├── JsonTool.vue
+│   │   │   │   ├── HtmlTool.vue
+│   │   │   │   ├── SqlTool.vue
+│   │   │   │   └── RegexTool.vue
+│   │   │   └── file/        # 文件工具
+│   │   │       ├── RenameTool.vue
+│   │   │       └── SearchTool.vue
+│   │   └── HomeView.vue     # 首页
+│   └── main.ts              # Vue 应用初始化
+├── resources/               # 资源文件（图标等）
+└── build/                   # 构建配置和图标文件
+    └── entitlements.mac.plist
 ```
+
+## 路由配置
+
+- `/` → 重定向到 `/tools/string/base64`
+- `/tools/string/base64` → Base64 编解码
+- `/tools/string/url` → URL 编解码
+- `/tools/string/json` → JSON 格式化
+- `/tools/string/html` → HTML 格式化
+- `/tools/string/sql` → SQL 格式化
+- `/tools/string/regex` → 正则测试
+- `/tools/file/rename` → 批量重命名
+- `/tools/file/search` → 文件搜索
 
 ## IPC 通信
 
-渲染进程通过 `window.electron` 与主进程通信：
+渲染进程通过 `contextBridge` 暴露的 API 与主进程通信：
 
 ```typescript
-// 渲染进程调用
-window.api.methodName(params)
+// 渲染进程调用文件操作 API
+window.api.selectFolder()           // 选择文件夹
+window.api.readDir(path)            // 读取目录内容
+window.api.renameFile(old, newPath) // 重命名文件
+window.api.batchRename(files)       // 批量重命名
+window.api.searchFiles(dir, keyword) // 搜索文件
+window.api.deleteFiles(paths)       // 删除文件
 
 // 主进程处理（ipcMain）
-ipcMain.handle('method-name', (event, params) => { ... })
+ipcMain.handle('select-folder', () => { ... })
+ipcMain.handle('read-dir', (event, path) => { ... })
+// ...
 ```
 
 ## 开源协议

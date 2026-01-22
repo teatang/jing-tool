@@ -4,7 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Cross-platform desktop tool collection built with Electron, Vue 3, and TypeScript. Features include Base64/URL/JSON/HTML/SQL/Regex string tools and batch rename/file search file tools.
+Cross-platform desktop tool collection built with Electron, Vue 3, and TypeScript.
+
+**String Tools**: Base64, URL, JSON, HTML, SQL formatting, Regex testing
+**File Tools**: Batch rename, File search
 
 ## Common Commands
 
@@ -35,11 +38,9 @@ pnpm format && pnpm lint && pnpm test
 
 Three-part Electron structure:
 
-- **`src/main/index.ts`** - Main process (Node.js). Creates BrowserWindow, handles app lifecycle, IPC main handlers.
-- **`src/preload/index.ts`** - Preload script. Exposes APIs to renderer via `contextBridge`. Runs in isolated context.
-- **`src/renderer/src`** - Vue 3 frontend. Mounted to DOM, communicates with main via `window.electron` IPC.
-
-**IPC Pattern**: Renderer uses `window.electron.ipcRenderer.send()` → Main process listens with `ipcMain.on()`.
+- **`src/main/index.ts`** - Main process (Node.js). Creates BrowserWindow, handles app lifecycle, IPC handlers.
+- **`src/preload/index.ts`** - Preload script. Exposes file operation APIs via `contextBridge`.
+- **`src/renderer/src`** - Vue 3 frontend. Mounted to DOM, communicates with main via `window.api`.
 
 ## Key Paths
 
@@ -66,6 +67,8 @@ Three-part Electron structure:
 ## Important Notes
 
 - Always use `label` instead of `value` for Element Plus `el-radio-button`
-- Use `router.push()` for navigation (not `router-link` or `router-mode`)
+- Use `router.push()` for navigation (not `router-link`)
 - Icons: Use `Lock`/`Unlock` instead of non-existent `Encode`/`Decode`
-- Theme CSS variables import: `element-plus/theme-chalk/dark/css-vars.css`
+- Theme CSS variables: `element-plus/theme-chalk/dark/css-vars.css`
+- File operations exposed via `window.api`: selectFolder, readDir, renameFile, batchRename, searchFiles, deleteFiles
+- Routes use hash mode (`createWebHashHistory`) for file:// protocol compatibility
