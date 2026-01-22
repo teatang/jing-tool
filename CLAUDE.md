@@ -8,6 +8,7 @@ Cross-platform desktop tool collection built with Electron, Vue 3, and TypeScrip
 
 **String Tools**: Base64, URL, JSON, HTML, SQL formatting, Regex testing
 **File Tools**: Batch rename, File search
+**Game**: Tetris (7 tetromino shapes, next piece preview, ghost piece, score/level system, dark/light theme)
 
 ## Common Commands
 
@@ -72,3 +73,4 @@ Three-part Electron structure:
 - Theme CSS variables: `element-plus/theme-chalk/dark/css-vars.css`
 - File operations exposed via `window.api`: selectFolder, readDir, renameFile, batchRename, searchFiles, deleteFiles
 - Routes use hash mode (`createWebHashHistory`) for file:// protocol compatibility
+- Game route: `/tools/game/tetris` → Tetris game (TetrisGame.vue)

@@ -18,6 +18,17 @@
 - **批量重命名** - 自定义规则批量重命名文件
 - **文件搜索** - 按文件名搜索文件并可选择删除
 
+### 游戏娱乐
+
+- **俄罗斯方块** - 经典俄罗斯方块游戏，支持：
+  - 7 种经典方块形状（I、O、T、S、Z、J、L）
+  - 不同方块不同颜色
+  - 下一个方块预览
+  - 幽灵方块显示落点
+  - 等级系统和分数计算
+  - 暂停/继续功能
+  - 深色/浅色模式自适应
+
 ### 主题支持
 
 - 浅色模式
@@ -110,6 +121,8 @@ src/
 │   │   │   └── file/        # 文件工具
 │   │   │       ├── RenameTool.vue
 │   │   │       └── SearchTool.vue
+│   │   │   └── game/        # 游戏娱乐
+│   │   │       └── TetrisGame.vue
 │   │   └── HomeView.vue     # 首页
 │   └── main.ts              # Vue 应用初始化
 ├── resources/               # 资源文件（图标等）
@@ -128,6 +141,7 @@ src/
 - `/tools/string/regex` → 正则测试
 - `/tools/file/rename` → 批量重命名
 - `/tools/file/search` → 文件搜索
+- `/tools/game/tetris` → 俄罗斯方块
 
 ## IPC 通信
 
