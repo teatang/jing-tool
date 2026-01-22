@@ -519,9 +519,9 @@ onUnmounted(() => {
               <div class="card-header">下一个</div>
             </template>
             <div class="next-piece-preview">
-              <div v-for="(row, rIndex) in 4" :key="rIndex" class="preview-row">
+              <div v-for="(_, rIndex) in 4" :key="rIndex" class="preview-row">
                 <div
-                  v-for="(col, cIndex) in 4"
+                  v-for="(_, cIndex) in 4"
                   :key="cIndex"
                   class="preview-cell"
                   :style="{
