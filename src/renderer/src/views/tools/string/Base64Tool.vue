@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Encode, Decode } from '@element-plus/icons-vue'
+import { Lock, Unlock } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
 const inputText = ref('')
 const outputText = ref('')
 const mode = ref<'encode' | 'decode'>('encode')
 
-const process = () => {
+const process = (): void => {
   try {
     if (mode.value === 'encode') {
       outputText.value = btoa(inputText.value)
@@ -20,19 +20,19 @@ const process = () => {
   }
 }
 
-const swapMode = () => {
+const swapMode = (): void => {
   mode.value = mode.value === 'encode' ? 'decode' : 'encode'
   const temp = inputText.value
   inputText.value = outputText.value
   outputText.value = temp
 }
 
-const clear = () => {
+const clear = (): void => {
   inputText.value = ''
   outputText.value = ''
 }
 
-const copyResult = async () => {
+const copyResult = async (): Promise<void> => {
   if (!outputText.value) return
   await navigator.clipboard.writeText(outputText.value)
   ElMessage.success('已复制到剪贴板')
@@ -50,11 +50,11 @@ const copyResult = async () => {
       <div class="tool-actions">
         <el-radio-group v-model="mode">
           <el-radio-button label="encode">
-            <el-icon><Encode /></el-icon>
+            <el-icon><Lock /></el-icon>
             编码
           </el-radio-button>
           <el-radio-button label="decode">
-            <el-icon><Decode /></el-icon>
+            <el-icon><Unlock /></el-icon>
             解码
           </el-radio-button>
         </el-radio-group>
@@ -86,9 +86,7 @@ const copyResult = async () => {
         />
       </div>
 
-      <el-button v-if="outputText" type="primary" @click="copyResult">
-        复制结果
-      </el-button>
+      <el-button v-if="outputText" type="primary" @click="copyResult"> 复制结果 </el-button>
     </div>
   </div>
 </template>

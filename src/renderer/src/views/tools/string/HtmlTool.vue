@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Document, Minus, Plus } from '@element-plus/icons-vue'
+import { Minus, Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
 const inputText = ref('')
 const outputText = ref('')
 const formatType = ref<'format' | 'minify'>('format')
 
-const process = () => {
+const process = (): void => {
   if (!inputText.value.trim()) {
     outputText.value = ''
     return
@@ -22,19 +22,16 @@ const process = () => {
     outputText.value = formatted.trim()
   } else {
     // HTML 压缩
-    outputText.value = inputText.value
-      .replace(/\s+/g, ' ')
-      .replace(/>\s+</g, '><')
-      .trim()
+    outputText.value = inputText.value.replace(/\s+/g, ' ').replace(/>\s+</g, '><').trim()
   }
 }
 
-const clear = () => {
+const clear = (): void => {
   inputText.value = ''
   outputText.value = ''
 }
 
-const copyResult = async () => {
+const copyResult = async (): Promise<void> => {
   if (!outputText.value) return
   await navigator.clipboard.writeText(outputText.value)
   ElMessage.success('已复制到剪贴板')
@@ -87,9 +84,7 @@ const copyResult = async () => {
         />
       </div>
 
-      <el-button v-if="outputText" type="primary" @click="copyResult">
-        复制结果
-      </el-button>
+      <el-button v-if="outputText" type="primary" @click="copyResult"> 复制结果 </el-button>
     </div>
   </div>
 </template>

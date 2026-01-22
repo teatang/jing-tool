@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { Search, Warning } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
@@ -16,7 +16,11 @@ const flagsOptions = [
   { label: 's (dotAll)', value: 's' }
 ]
 
-const testRegex = () => {
+const matchesText = computed(() => {
+  return matches.value.join('\n')
+})
+
+const testRegex = (): void => {
   errorMsg.value = ''
   matches.value = []
 
@@ -36,14 +40,14 @@ const testRegex = () => {
   }
 }
 
-const clear = () => {
+const clear = (): void => {
   regexPattern.value = ''
   testString.value = ''
   matches.value = []
   errorMsg.value = ''
 }
 
-const matchCount = () => {
+const matchCount = (): number => {
   return matches.value.length
 }
 </script>
@@ -57,11 +61,7 @@ const matchCount = () => {
 
     <div class="tool-content">
       <div class="regex-config">
-        <el-input
-          v-model="regexPattern"
-          placeholder="输入正则表达式，如: \w+"
-          style="flex: 2"
-        >
+        <el-input v-model="regexPattern" placeholder="输入正则表达式，如: \w+" style="flex: 2">
           <template #prepend>正则</template>
         </el-input>
         <el-select v-model="flags" multiple placeholder="标志" style="width: 200px">
@@ -113,31 +113,13 @@ const matchCount = () => {
       </div>
 
       <div v-if="matches.length > 0" class="matches-list">
-        <el-tag
-          v-for="(match, index) in matches"
-          :key="index"
-          type="success"
-          size="large"
-        >
+        <el-tag v-for="(match, index) in matches" :key="index" type="success" size="large">
           {{ index + 1 }}. {{ match }}
         </el-tag>
       </div>
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import { computed } from 'vue'
-
-export default {
-  setup() {
-    const matchesText = computed(() => {
-      return matches.value.join('\n')
-    })
-    return { matchesText }
-  }
-}
-</script>
 
 <style scoped>
 .regex-config {

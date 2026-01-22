@@ -1,15 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useRoute, useRouter, RouterView } from 'vue-router'
 import { useTheme } from './composables/useTheme'
-import {
-  Sunny,
-  Moon,
-  Monitor,
-  Connection,
-  Document,
-  Folder
-} from '@element-plus/icons-vue'
+import { Sunny, Moon, Monitor, Connection, Document, Folder } from '@element-plus/icons-vue'
 
 const { themeMode, toggleTheme } = useTheme()
 const route = useRoute()
@@ -51,7 +44,7 @@ const fileTools = [
   { name: '文件搜索', path: '/tools/file/search' }
 ]
 
-const navigateTo = (path: string) => {
+const navigateTo = (path: string): void => {
   router.push(path)
 }
 </script>
@@ -65,10 +58,7 @@ const navigateTo = (path: string) => {
       </div>
 
       <el-scrollbar>
-        <el-menu
-          :default-active="route.path"
-          class="sidebar-menu"
-        >
+        <el-menu :default-active="route.path" class="sidebar-menu">
           <el-sub-menu index="string">
             <template #title>
               <el-icon><Document /></el-icon>
@@ -104,11 +94,7 @@ const navigateTo = (path: string) => {
       </el-scrollbar>
 
       <div class="sidebar-footer">
-        <el-button
-          class="theme-btn"
-          :icon="themeIcon"
-          @click="toggleTheme"
-        >
+        <el-button class="theme-btn" :icon="themeIcon" @click="toggleTheme">
           {{ themeText }}
         </el-button>
       </div>

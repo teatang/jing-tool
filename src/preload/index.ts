@@ -10,8 +10,7 @@ const api = {
     ipcRenderer.invoke('rename-file', oldPath, newPath),
   batchRename: (files: Array<{ path: string; newName: string }>) =>
     ipcRenderer.invoke('batch-rename', files),
-  searchFiles: (dir: string, keyword: string) =>
-    ipcRenderer.invoke('search-files', dir, keyword),
+  searchFiles: (dir: string, keyword: string) => ipcRenderer.invoke('search-files', dir, keyword),
   deleteFiles: (paths: string[]) => ipcRenderer.invoke('delete-files', paths)
 }
 

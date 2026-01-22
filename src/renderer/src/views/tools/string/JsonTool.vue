@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Document, Warning } from '@element-plus/icons-vue'
+import { Warning } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
 const inputText = ref('')
@@ -8,7 +8,7 @@ const outputText = ref('')
 const errorMsg = ref('')
 const formatType = ref<'format' | 'minify'>('format')
 
-const process = () => {
+const process = (): void => {
   errorMsg.value = ''
   if (!inputText.value.trim()) {
     outputText.value = ''
@@ -30,13 +30,13 @@ const process = () => {
   }
 }
 
-const clear = () => {
+const clear = (): void => {
   inputText.value = ''
   outputText.value = ''
   errorMsg.value = ''
 }
 
-const copyResult = async () => {
+const copyResult = async (): Promise<void> => {
   if (!outputText.value) return
   await navigator.clipboard.writeText(outputText.value)
   ElMessage.success('已复制到剪贴板')
@@ -53,13 +53,8 @@ const copyResult = async () => {
     <div class="tool-content">
       <div class="tool-actions">
         <el-radio-group v-model="formatType">
-          <el-radio-button label="format">
-            <el-icon><Document /></el-icon>
-            格式化
-          </el-radio-button>
-          <el-radio-button label="minify">
-            压缩
-          </el-radio-button>
+          <el-radio-button label="format"> 格式化 </el-radio-button>
+          <el-radio-button label="minify"> 压缩 </el-radio-button>
         </el-radio-group>
         <el-button @click="clear">清空</el-button>
         <el-button type="primary" @click="process">处理</el-button>
@@ -97,9 +92,7 @@ const copyResult = async () => {
         />
       </div>
 
-      <el-button v-if="outputText" type="primary" @click="copyResult">
-        复制结果
-      </el-button>
+      <el-button v-if="outputText" type="primary" @click="copyResult"> 复制结果 </el-button>
     </div>
   </div>
 </template>

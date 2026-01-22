@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Document, Minus, Plus } from '@element-plus/icons-vue'
+import { Minus, Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
 const inputText = ref('')
@@ -8,52 +8,210 @@ const outputText = ref('')
 const formatType = ref<'format' | 'minify'>('format')
 const indentSize = ref(2)
 
-const process = () => {
+// SQL关键字列表
+const uppercaseKeywords = [
+  'SELECT',
+  'FROM',
+  'WHERE',
+  'AND',
+  'OR',
+  'INSERT',
+  'INTO',
+  'VALUES',
+  'UPDATE',
+  'SET',
+  'DELETE',
+  'CREATE',
+  'TABLE',
+  'ALTER',
+  'DROP',
+  'JOIN',
+  'LEFT',
+  'RIGHT',
+  'INNER',
+  'OUTER',
+  'FULL',
+  'CROSS',
+  'NATURAL',
+  'ON',
+  'ORDER',
+  'GROUP',
+  'HAVING',
+  'LIMIT',
+  'OFFSET',
+  'UNION',
+  'ALL',
+  'DISTINCT',
+  'DISTINCTROW',
+  'AS',
+  'IN',
+  'NOT',
+  'NULL',
+  'IS',
+  'LIKE',
+  'BETWEEN',
+  'CASE',
+  'WHEN',
+  'THEN',
+  'ELSE',
+  'END',
+  'ASC',
+  'DESC',
+  'PRIMARY',
+  'KEY',
+  'FOREIGN',
+  'REFERENCES',
+  'CONSTRAINT',
+  'INDEX',
+  'UNIQUE',
+  'CHECK',
+  'DEFAULT',
+  'CASCADE',
+  'RESTRICT',
+  'NO',
+  'ACTION',
+  'EXISTS',
+  'CAST',
+  'COLLATE',
+  'CONVERT',
+  'TRUNCATE',
+  'TEMPORARY',
+  'IF',
+  'FOR',
+  'VIEW',
+  'MATERIALIZED',
+  'WITH',
+  'RECURSIVE',
+  'OVER',
+  'PARTITION',
+  'ROWS',
+  'RANGE',
+  'PRECEDING',
+  'FOLLOWING',
+  'CURRENT',
+  'ROW',
+  'ROWS',
+  'FETCH',
+  'FIRST',
+  'NEXT',
+  'ONLY',
+  'LOCK',
+  'TABLE'
+]
+
+// 需要换行的关键字（作为独立行的开始）
+const lineBreakKeywords = [
+  'SELECT',
+  'FROM',
+  'WHERE',
+  'AND',
+  'OR',
+  'INSERT',
+  'INTO',
+  'VALUES',
+  'UPDATE',
+  'SET',
+  'DELETE',
+  'JOIN',
+  'LEFT JOIN',
+  'RIGHT JOIN',
+  'INNER JOIN',
+  'OUTER JOIN',
+  'FULL JOIN',
+  'CROSS JOIN',
+  'NATURAL JOIN',
+  'ON',
+  'ORDER BY',
+  'GROUP BY',
+  'HAVING',
+  'LIMIT',
+  'OFFSET',
+  'UNION',
+  'UNION ALL',
+  'EXCEPT',
+  'INTERSECT',
+  'FETCH FIRST',
+  'FOR UPDATE',
+  'FOR SHARE'
+]
+
+const formatSql = (sql: string): string => {
+  const indent = ' '.repeat(indentSize.value)
+
+  // 1. 大写关键字
+  let formatted = sql
+  uppercaseKeywords.forEach((keyword) => {
+    const regex = new RegExp(`\\b${keyword}\\b`, 'gi')
+    formatted = formatted.replace(regex, keyword)
+  })
+
+  // 2. 处理多词关键字（如 ORDER BY, GROUP BY 等）
+  lineBreakKeywords.forEach((keyword) => {
+    const words = keyword.split(' ')
+    if (words.length === 2) {
+      const regex = new RegExp(`\\b${words[0]}\\s+${words[1]}\\b`, 'gi')
+      formatted = formatted.replace(regex, `${words[0]} ${words[1]}`)
+    }
+  })
+
+  // 3. 将所有关键字换行处理
+  // 先用单个空格替换多个空格
+  formatted = formatted.replace(/\s+/g, ' ')
+
+  // 在换行关键字前添加换行
+  lineBreakKeywords.forEach((keyword) => {
+    const words = keyword.split(' ')
+    if (words.length === 2) {
+      const pattern = words.join(`(?=\\s)`)
+      const regex = new RegExp(`(?<=${pattern})\\s+`, 'gi')
+      formatted = formatted.replace(regex, '\n' + indent)
+    } else {
+      const regex = new RegExp(`(?<=${keyword})\\s+`, 'gi')
+      formatted = formatted.replace(regex, '\n' + indent)
+    }
+  })
+
+  // 4. 处理括号内的内容缩进
+  formatted = formatted.replace(/\(/g, '(\n' + indent + indent)
+  formatted = formatted.replace(/\)/g, '\n' + indent + ')')
+
+  // 5. 处理逗号（SELECT列表中的逗号后不换行，参数列表中的逗号后换行）
+  // SELECT后面的内容，逗号后不换行
+  formatted = formatted.replace(/,\n(?!\s*['"])/g, ',\n' + indent)
+
+  // 6. 调整缩进级别
+  const lines = formatted.split('\n')
+  let depth = 0
+  const result: string[] = []
+
+  lines.forEach((line) => {
+    const trimmed = line.trim()
+    if (!trimmed) return
+
+    // 减少缩进的情况
+    if (trimmed.startsWith(')') || trimmed.startsWith('END') || trimmed.startsWith('ELSE')) {
+      depth = Math.max(0, depth - 1)
+    }
+
+    result.push(indent.repeat(depth) + trimmed)
+
+    // 增加缩进的情况
+    if (trimmed.endsWith('(') || trimmed.endsWith('BEGIN') || trimmed.endsWith('{')) {
+      depth++
+    }
+  })
+
+  return result.join('\n')
+}
+
+const process = (): void => {
   if (!inputText.value.trim()) {
     outputText.value = ''
     return
   }
 
   if (formatType.value === 'format') {
-    // 简单的 SQL 格式化
-    const keywords = [
-      'SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'INSERT', 'INTO', 'VALUES',
-      'UPDATE', 'SET', 'DELETE', 'CREATE', 'TABLE', 'ALTER', 'DROP',
-      'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER', 'ON', 'ORDER', 'BY',
-      'GROUP', 'HAVING', 'LIMIT', 'OFFSET', 'UNION', 'ALL', 'DISTINCT',
-      'AS', 'IN', 'NOT', 'NULL', 'IS', 'LIKE', 'BETWEEN', 'INNER', 'CASE',
-      'WHEN', 'THEN', 'ELSE', 'END', 'ASC', 'DESC'
-    ]
-
-    let sql = inputText.value
-    // 大写关键字
-    keywords.forEach(keyword => {
-      const regex = new RegExp(`\\b${keyword}\\b`, 'gi')
-      sql = sql.replace(regex, keyword)
-    })
-
-    // 添加缩进
-    const indent = ' '.repeat(indentSize.value)
-    const lines = sql.split('\n')
-    let formatted = ''
-    let depth = 0
-
-    lines.forEach(line => {
-      const trimmed = line.trim()
-      if (!trimmed) return
-
-      if (trimmed.endsWith('BEGIN') || trimmed.endsWith('{')) {
-        formatted += indent.repeat(depth) + trimmed + '\n'
-        depth++
-      } else if (trimmed.startsWith('END') || trimmed.startsWith('}') || trimmed === 'END') {
-        depth--
-        formatted += indent.repeat(depth) + trimmed + '\n'
-      } else {
-        formatted += indent.repeat(depth) + trimmed + '\n'
-      }
-    })
-
-    outputText.value = formatted.trim()
+    outputText.value = formatSql(inputText.value)
   } else {
     // SQL 压缩
     outputText.value = inputText.value
@@ -63,12 +221,12 @@ const process = () => {
   }
 }
 
-const clear = () => {
+const clear = (): void => {
   inputText.value = ''
   outputText.value = ''
 }
 
-const copyResult = async () => {
+const copyResult = async (): Promise<void> => {
   if (!outputText.value) return
   await navigator.clipboard.writeText(outputText.value)
   ElMessage.success('已复制到剪贴板')
@@ -125,9 +283,7 @@ const copyResult = async () => {
         />
       </div>
 
-      <el-button v-if="outputText" type="primary" @click="copyResult">
-        复制结果
-      </el-button>
+      <el-button v-if="outputText" type="primary" @click="copyResult"> 复制结果 </el-button>
     </div>
   </div>
 </template>

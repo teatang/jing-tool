@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Folder, Search, Delete, Check } from '@element-plus/icons-vue'
+import { Folder, Search, Delete, Document } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 interface SearchResult {
@@ -15,14 +15,14 @@ const results = ref<SearchResult[]>([])
 const loading = ref(false)
 const searching = ref(false)
 
-const selectFolder = async () => {
+const selectFolder = async (): Promise<void> => {
   const path = await window.api.selectFolder()
   if (path) {
     searchPath.value = path
   }
 }
 
-const searchFiles = async () => {
+const searchFiles = async (): Promise<void> => {
   if (!searchPath.value) {
     ElMessage.warning('请先选择搜索文件夹')
     return
@@ -38,7 +38,7 @@ const searchFiles = async () => {
 
   try {
     const files = await window.api.searchFiles(searchPath.value, keyword.value)
-    results.value = files.map(f => ({
+    results.value = files.map((f) => ({
       ...f,
       selected: false
     }))
@@ -48,25 +48,25 @@ const searchFiles = async () => {
   }
 }
 
-const toggleSelect = (result: SearchResult) => {
+const toggleSelect = (result: SearchResult): void => {
   result.selected = !result.selected
 }
 
-const selectAll = () => {
-  const allSelected = results.value.every(r => r.selected)
-  results.value.forEach(r => r.selected = !allSelected)
+const selectAll = (): void => {
+  const allSelected = results.value.every((r) => r.selected)
+  results.value.forEach((r) => (r.selected = !allSelected))
 }
 
-const hasSelected = () => {
-  return results.value.some(r => r.selected)
+const hasSelected = (): boolean => {
+  return results.value.some((r) => r.selected)
 }
 
-const selectedCount = () => {
-  return results.value.filter(r => r.selected).length
+const selectedCount = (): number => {
+  return results.value.filter((r) => r.selected).length
 }
 
-const deleteSelected = async () => {
-  const toDelete = results.value.filter(r => r.selected)
+const deleteSelected = async (): Promise<void> => {
+  const toDelete = results.value.filter((r) => r.selected)
 
   if (toDelete.length === 0) {
     ElMessage.warning('请先选择要删除的文件')
@@ -85,14 +85,16 @@ const deleteSelected = async () => {
 
   loading.value = true
   try {
-    const paths = toDelete.map(r => r.path)
+    const paths = toDelete.map((r) => r.path)
     const resultsDelete = await window.api.deleteFiles(paths)
-    const successCount = resultsDelete.filter(r => r.success).length
+    const successCount = resultsDelete.filter((r) => r.success).length
 
     if (successCount > 0) {
       ElMessage.success(`成功删除 ${successCount} 个文件`)
       // 移除已删除的文件
-      results.value = results.value.filter(r => !r.selected || !resultsDelete.find(d => d.path === r.path && d.success))
+      results.value = results.value.filter(
+        (r) => !r.selected || !resultsDelete.find((d) => d.path === r.path && d.success)
+      )
     }
 
     const failCount = resultsDelete.length - successCount
@@ -104,7 +106,7 @@ const deleteSelected = async () => {
   }
 }
 
-const clearSearch = () => {
+const clearSearch = (): void => {
   results.value = []
   keyword.value = ''
 }
@@ -119,12 +121,7 @@ const clearSearch = () => {
 
     <div class="tool-content">
       <div class="search-config">
-        <el-input
-          v-model="searchPath"
-          placeholder="选择搜索文件夹"
-          readonly
-          style="flex: 1"
-        >
+        <el-input v-model="searchPath" placeholder="选择搜索文件夹" readonly style="flex: 1">
           <template #append>
             <el-button @click="selectFolder">
               <el-icon><Folder /></el-icon>
@@ -138,11 +135,7 @@ const clearSearch = () => {
           style="width: 300px"
           @keyup.enter="searchFiles"
         />
-        <el-button
-          type="primary"
-          :loading="searching"
-          @click="searchFiles"
-        >
+        <el-button type="primary" :loading="searching" @click="searchFiles">
           <el-icon><Search /></el-icon>
           搜索
         </el-button>
@@ -151,34 +144,22 @@ const clearSearch = () => {
 
       <div v-if="results.length > 0" class="result-toolbar">
         <el-checkbox
-          :model-value="results.length > 0 && results.every(r => r.selected)"
-          :indeterminate="results.some(r => r.selected) && !results.every(r => r.selected)"
+          :model-value="results.length > 0 && results.every((r) => r.selected)"
+          :indeterminate="results.some((r) => r.selected) && !results.every((r) => r.selected)"
           @change="selectAll"
         >
           全选 ({{ selectedCount() }}/{{ results.length }})
         </el-checkbox>
-        <el-button
-          type="danger"
-          :disabled="!hasSelected()"
-          @click="deleteSelected"
-        >
+        <el-button type="danger" :disabled="!hasSelected()" @click="deleteSelected">
           <el-icon><Delete /></el-icon>
           删除选中 ({{ selectedCount() }})
         </el-button>
       </div>
 
-      <el-table
-        v-loading="loading"
-        :data="results"
-        style="width: 100%"
-        max-height="500"
-      >
+      <el-table v-loading="loading" :data="results" style="width: 100%" max-height="500">
         <el-table-column width="50">
           <template #default="{ row }">
-            <el-checkbox
-              :model-value="row.selected"
-              @change="toggleSelect(row)"
-            />
+            <el-checkbox :model-value="row.selected" @change="toggleSelect(row)" />
           </template>
         </el-table-column>
         <el-table-column label="文件名" min-width="250">

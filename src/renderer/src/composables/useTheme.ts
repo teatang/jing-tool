@@ -5,10 +5,15 @@ export type ThemeMode = 'light' | 'dark' | 'system'
 
 const themeMode: Ref<ThemeMode> = ref('system')
 
-export function useTheme() {
+export function useTheme(): {
+  themeMode: Ref<ThemeMode>
+  isDark: Ref<boolean>
+  setTheme: (mode: ThemeMode) => void
+  toggleTheme: () => void
+} {
   const isDark = ref(false)
 
-  const updateTheme = () => {
+  const updateTheme = (): void => {
     const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches
     const dark = themeMode.value === 'dark' || (themeMode.value === 'system' && isSystemDark)
     isDark.value = dark
@@ -27,12 +32,12 @@ export function useTheme() {
     localStorage.setItem('theme-mode', themeMode.value)
   }
 
-  const setTheme = (mode: ThemeMode) => {
+  const setTheme = (mode: ThemeMode): void => {
     themeMode.value = mode
     updateTheme()
   }
 
-  const toggleTheme = () => {
+  const toggleTheme = (): void => {
     if (themeMode.value === 'light') {
       setTheme('dark')
     } else if (themeMode.value === 'dark') {
@@ -42,14 +47,14 @@ export function useTheme() {
     }
   }
 
-  onMounted(() => {
+  onMounted((): void => {
     const saved = localStorage.getItem('theme-mode') as ThemeMode | null
     if (saved) {
       themeMode.value = saved
     }
     updateTheme()
 
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (): void => {
       if (themeMode.value === 'system') {
         updateTheme()
       }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Folder, Refresh, Edit, Check } from '@element-plus/icons-vue'
+import { Folder, Refresh, Edit, Check, Document } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 interface FileEntry {
@@ -16,7 +16,7 @@ const files = ref<FileEntry[]>([])
 const loading = ref(false)
 const selectedFiles = ref<Set<string>>(new Set())
 
-const selectFolder = async () => {
+const selectFolder = async (): Promise<void> => {
   const path = await window.api.selectFolder()
   if (path) {
     currentPath.value = path
@@ -24,7 +24,7 @@ const selectFolder = async () => {
   }
 }
 
-const loadFiles = async () => {
+const loadFiles = async (): Promise<void> => {
   if (!currentPath.value) return
   loading.value = true
   try {
@@ -39,12 +39,12 @@ const loadFiles = async () => {
   }
 }
 
-const startEdit = (file: FileEntry) => {
+const startEdit = (file: FileEntry): void => {
   file.editing = true
   file.newName = file.name
 }
 
-const saveEdit = async (file: FileEntry) => {
+const saveEdit = async (file: FileEntry): Promise<void> => {
   if (!file.newName || file.newName === file.name) {
     file.editing = false
     return
@@ -64,15 +64,15 @@ const saveEdit = async (file: FileEntry) => {
   }
 }
 
-const cancelEdit = (file: FileEntry) => {
+const cancelEdit = (file: FileEntry): void => {
   file.editing = false
   file.newName = file.name
 }
 
-const batchRename = async () => {
+const batchRename = async (): Promise<void> => {
   const filesToRename = files.value
-    .filter(f => f.editing && f.newName && f.newName !== f.name)
-    .map(f => ({ path: f.path, newName: f.newName! }))
+    .filter((f) => f.editing && f.newName && f.newName !== f.name)
+    .map((f) => ({ path: f.path, newName: f.newName! }))
 
   if (filesToRename.length === 0) {
     ElMessage.warning('没有需要重命名的文件')
@@ -80,11 +80,9 @@ const batchRename = async () => {
   }
 
   try {
-    await ElMessageBox.confirm(
-      `确定要批量重命名 ${filesToRename.length} 个文件吗？`,
-      '确认',
-      { type: 'warning' }
-    )
+    await ElMessageBox.confirm(`确定要批量重命名 ${filesToRename.length} 个文件吗？`, '确认', {
+      type: 'warning'
+    })
   } catch {
     return
   }
@@ -92,7 +90,7 @@ const batchRename = async () => {
   loading.value = true
   try {
     const results = await window.api.batchRename(filesToRename)
-    const successCount = results.filter(r => r.success).length
+    const successCount = results.filter((r) => r.success).length
     const failCount = results.length - successCount
 
     if (successCount > 0) {
@@ -108,7 +106,7 @@ const batchRename = async () => {
   }
 }
 
-const toggleSelection = (path: string) => {
+const toggleSelection = (path: string): void => {
   if (selectedFiles.value.has(path)) {
     selectedFiles.value.delete(path)
   } else {
@@ -116,16 +114,16 @@ const toggleSelection = (path: string) => {
   }
 }
 
-const selectAll = () => {
+const selectAll = (): void => {
   if (selectedFiles.value.size === files.value.length) {
     selectedFiles.value.clear()
   } else {
-    files.value.forEach(f => selectedFiles.value.add(f.path))
+    files.value.forEach((f) => selectedFiles.value.add(f.path))
   }
 }
 
-const canRename = computed(() => {
-  return files.value.some(f => f.editing && f.newName && f.newName !== f.name)
+const canRename = computed((): boolean => {
+  return files.value.some((f) => f.editing && f.newName && f.newName !== f.name)
 })
 </script>
 
@@ -138,12 +136,7 @@ const canRename = computed(() => {
 
     <div class="tool-content">
       <div class="path-selector">
-        <el-input
-          v-model="currentPath"
-          placeholder="选择文件夹路径"
-          readonly
-          style="flex: 1"
-        >
+        <el-input v-model="currentPath" placeholder="选择文件夹路径" readonly style="flex: 1">
           <template #append>
             <el-button @click="selectFolder">
               <el-icon><Folder /></el-icon>
@@ -151,7 +144,7 @@ const canRename = computed(() => {
             </el-button>
           </template>
         </el-input>
-        <el-button @click="loadFiles" :loading="loading" :disabled="!currentPath">
+        <el-button :disabled="!currentPath" :loading="loading" @click="loadFiles">
           <el-icon><Refresh /></el-icon>
           刷新
         </el-button>
@@ -165,21 +158,10 @@ const canRename = computed(() => {
         >
           全选 ({{ selectedFiles.size }}/{{ files.length }})
         </el-checkbox>
-        <el-button
-          v-if="canRename"
-          type="primary"
-          @click="batchRename"
-        >
-          应用所有修改
-        </el-button>
+        <el-button v-if="canRename" type="primary" @click="batchRename"> 应用所有修改 </el-button>
       </div>
 
-      <el-table
-        v-loading="loading"
-        :data="files"
-        style="width: 100%"
-        max-height="500"
-      >
+      <el-table v-loading="loading" :data="files" style="width: 100%" max-height="500">
         <el-table-column width="50">
           <template #default="{ row }">
             <el-checkbox
@@ -211,21 +193,11 @@ const canRename = computed(() => {
                   circle
                   @click="saveEdit(row)"
                 />
-                <el-button
-                  size="small"
-                  :icon="Edit"
-                  circle
-                  @click="cancelEdit(row)"
-                />
+                <el-button size="small" :icon="Edit" circle @click="cancelEdit(row)" />
               </template>
               <template v-else>
                 <span>{{ row.name }}</span>
-                <el-button
-                  size="small"
-                  :icon="Edit"
-                  circle
-                  @click="startEdit(row)"
-                />
+                <el-button size="small" :icon="Edit" circle @click="startEdit(row)" />
               </template>
             </div>
           </template>
