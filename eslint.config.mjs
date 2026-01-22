@@ -36,5 +36,10 @@ export default defineConfig(
       ]
     }
   },
-  eslintConfigPrettier
+  eslintConfigPrettier,
+  {
+    rules: {
+      'prettier/prettier': ['error', { endOfLine: 'auto' }]
+    }
+  }
 )
