@@ -5,7 +5,7 @@ import { ElMessage } from 'element-plus'
 
 const regexPattern = ref('')
 const testString = ref('')
-const flags = ref('g')
+const flags = ref<string[]>(['g'])
 const matches = ref<string[]>([])
 const errorMsg = ref('')
 
@@ -30,7 +30,9 @@ const testRegex = (): void => {
   }
 
   try {
-    const regex = new RegExp(regexPattern.value, flags.value)
+    // flags 是数组，需要合并为字符串
+    const flagsString = flags.value.join('')
+    const regex = new RegExp(regexPattern.value, flagsString)
     const results = testString.value.match(regex)
     matches.value = results || []
   } catch (e: unknown) {

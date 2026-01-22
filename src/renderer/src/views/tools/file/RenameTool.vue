@@ -50,6 +50,20 @@ const saveEdit = async (file: FileEntry): Promise<void> => {
     return
   }
 
+  // 验证文件名不能包含路径分隔符
+  if (file.newName.includes('/') || file.newName.includes('\\')) {
+    ElMessage.error('文件名不能包含路径分隔符')
+    file.newName = file.name
+    return
+  }
+
+  // 验证文件名不能为空或只有空白
+  if (!file.newName.trim()) {
+    ElMessage.error('文件名不能为空')
+    file.newName = file.name
+    return
+  }
+
   try {
     const result = await window.api.renameFile(file.path, file.newName)
     if (result.success) {
@@ -58,9 +72,11 @@ const saveEdit = async (file: FileEntry): Promise<void> => {
       ElMessage.success('重命名成功')
     } else {
       ElMessage.error(result.error || '重命名失败')
+      file.newName = file.name // 重置为原文件名
     }
   } catch {
     ElMessage.error('重命名失败')
+    file.newName = file.name // 重置为原文件名
   }
 }
 
@@ -73,6 +89,18 @@ const batchRename = async (): Promise<void> => {
   const filesToRename = files.value
     .filter((f) => f.editing && f.newName && f.newName !== f.name)
     .map((f) => ({ path: f.path, newName: f.newName! }))
+
+  // 验证所有文件名
+  for (const file of filesToRename) {
+    if (file.newName.includes('/') || file.newName.includes('\\')) {
+      ElMessage.error(`文件名 "${file.newName}" 包含非法字符`)
+      return
+    }
+    if (!file.newName.trim()) {
+      ElMessage.error('文件名不能为空')
+      return
+    }
+  }
 
   if (filesToRename.length === 0) {
     ElMessage.warning('没有需要重命名的文件')
