@@ -166,6 +166,7 @@ const matchCount = (): number => {
         />
         <div v-if="matches.length > 0" class="highlight-preview">
           <div class="highlight-label">高亮预览</div>
+          <!-- eslint-disable-next-line vue/no-v-html -->
           <div class="highlight-content" v-html="highlightedText"></div>
         </div>
       </div>

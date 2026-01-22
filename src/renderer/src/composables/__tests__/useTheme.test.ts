@@ -120,32 +120,24 @@ describe('useTheme', () => {
   })
 
   describe('isDark calculation', () => {
+    const checkIsDark = (mode: ThemeMode, systemIsDark: boolean): boolean => {
+      return mode === 'dark' || (mode === 'system' && systemIsDark)
+    }
+
     it('should be false for light mode', () => {
-      const themeMode: ThemeMode = 'light'
-      const isSystemDark = false
-      const isDark = themeMode === 'dark' || (themeMode === 'system' && isSystemDark)
-      expect(isDark).toBe(false)
+      expect(checkIsDark('light', false)).toBe(false)
     })
 
     it('should be true for dark mode', () => {
-      const themeMode: ThemeMode = 'dark'
-      const isSystemDark = false
-      const isDark = themeMode === 'dark' || (themeMode === 'system' && isSystemDark)
-      expect(isDark).toBe(true)
+      expect(checkIsDark('dark', false)).toBe(true)
     })
 
     it('should be true for system mode when system is dark', () => {
-      const themeMode: ThemeMode = 'system'
-      const isSystemDark = true
-      const isDark = themeMode === 'dark' || (themeMode === 'system' && isSystemDark)
-      expect(isDark).toBe(true)
+      expect(checkIsDark('system', true)).toBe(true)
     })
 
     it('should be false for system mode when system is light', () => {
-      const themeMode: ThemeMode = 'system'
-      const isSystemDark = false
-      const isDark = themeMode === 'dark' || (themeMode === 'system' && isSystemDark)
-      expect(isDark).toBe(false)
+      expect(checkIsDark('system', false)).toBe(false)
     })
   })
 

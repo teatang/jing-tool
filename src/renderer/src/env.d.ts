@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+/// <reference types="vitest/globals" />
 
 declare module '*.vue' {
   import type { DefineComponent } from 'vue'
@@ -8,6 +9,9 @@ declare module '*.vue' {
 
 interface Window {
   electron: {
+    process: {
+      versions: Record<string, string>
+    }
     ipcRenderer: {
       send: (channel: string, ...args: unknown[]) => void
       on: (channel: string, listener: (...args: unknown[]) => void) => void
