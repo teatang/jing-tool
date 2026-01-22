@@ -60,6 +60,7 @@ const COLORS = {
 // 游戏状态
 const board = ref<string[][]>([])
 const currentPiece = ref<{ shape: string; x: number; y: number; rotation: number } | null>(null)
+const nextPiece = ref<string>('T') // 下一个方块
 const score = ref(0)
 const lines = ref(0)
 const level = ref(1)
@@ -68,6 +69,21 @@ const isPaused = ref(false)
 const isPlaying = ref(false)
 const highScore = ref(0)
 const gameInterval = ref<number | null>(null)
+
+// 预生成下一个方块
+const generateNextPiece = (): string => {
+  return SHAPES[Math.floor(Math.random() * SHAPES.length)]
+}
+
+// 计算幽灵方块位置
+const getGhostY = (): number => {
+  if (!currentPiece.value) return 0
+  let ghostY = currentPiece.value.y
+  while (!collision(0, ghostY - currentPiece.value.y + 1, currentPiece.value.rotation)) {
+    ghostY++
+  }
+  return ghostY
+}
 
 // 初始化游戏板
 const initBoard = (): void => {
@@ -78,7 +94,8 @@ const initBoard = (): void => {
 
 // 生成新方块
 const spawnPiece = (): void => {
-  const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)]
+  // 使用预生成的下一个方块
+  const shape = nextPiece.value
   const matrix = TETROMINOES[shape as keyof typeof TETROMINOES]
   const pieceWidth = matrix[0].length
   currentPiece.value = {
@@ -87,6 +104,9 @@ const spawnPiece = (): void => {
     y: 0,
     rotation: 0
   }
+
+  // 生成新的下一个方块
+  nextPiece.value = generateNextPiece()
 
   // 检查游戏是否结束（新方块无法放置在顶部）
   if (collision(0, 0, 0)) {
@@ -176,7 +196,7 @@ const move = (dx: number, dy: number): boolean => {
   if (collision(dx, dy, currentPiece.value.rotation)) {
     if (dy > 0) {
       lockPiece()
-      return true
+      return false // 移动到底部后返回 false，停止循环
     }
     return false
   }
@@ -216,6 +236,8 @@ const startGame = (): void => {
   gameOver.value = false
   isPaused.value = false
   isPlaying.value = true
+  // 先初始化下一个方块，再生成当前方块
+  nextPiece.value = generateNextPiece()
   spawnPiece()
   if (gameInterval.value) clearInterval(gameInterval.value)
   gameInterval.value = window.setInterval(
@@ -325,6 +347,55 @@ const isPieceCell = (row: number, col: number): boolean => {
   return false
 }
 
+// 是否为幽灵方块位置
+const isGhostCell = (row: number, col: number): boolean => {
+  if (!currentPiece.value || gameOver.value || isPaused.value) return false
+  const ghostY = getGhostY()
+  if (ghostY === currentPiece.value.y) return false // 已经在底部
+  const matrix = getPieceMatrix(currentPiece.value.shape, currentPiece.value.rotation)
+  for (let r = 0; r < matrix.length; r++) {
+    for (let c = 0; c < matrix[r].length; c++) {
+      if (matrix[r][c]) {
+        const boardX = currentPiece.value.x + c
+        const boardY = ghostY + r
+        if (boardX === col && boardY === row) {
+          // 确保不是实际方块位置
+          if (!isPieceCell(row, col)) {
+            return true
+          }
+        }
+      }
+    }
+  }
+  return false
+}
+
+// 获取幽灵方块颜色
+const getGhostColor = (): string => {
+  if (!currentPiece.value) return ''
+  return COLORS[currentPiece.value.shape as keyof typeof COLORS] + '50' // 半透明
+}
+
+// 获取下一个方块预览颜色
+const getNextPieceCellColor = (row: number, col: number): string => {
+  const matrix = TETROMINOES[nextPiece.value as keyof typeof TETROMINOES]
+  // 计算居中偏移
+  const offsetX = Math.floor((4 - matrix[0].length) / 2)
+  const offsetY = Math.floor((4 - matrix.length) / 2)
+  const localRow = row - offsetY
+  const localCol = col - offsetX
+  if (
+    localRow >= 0 &&
+    localRow < matrix.length &&
+    localCol >= 0 &&
+    localCol < matrix[0].length &&
+    matrix[localRow][localCol]
+  ) {
+    return COLORS[nextPiece.value as keyof typeof COLORS]
+  }
+  return ''
+}
+
 onMounted(() => {
   const saved = localStorage.getItem('tetris-high-score')
   if (saved) highScore.value = parseInt(saved)
@@ -368,12 +439,15 @@ onUnmounted(() => {
             class="board-cell"
             :class="{
               filled: getCellColor(row - 1, col - 1),
-              preview: isPieceCell(row - 1, col - 1)
+              preview: isPieceCell(row - 1, col - 1),
+              ghost: isGhostCell(row - 1, col - 1)
             }"
             :style="
               getCellColor(row - 1, col - 1)
                 ? { backgroundColor: getCellColor(row - 1, col - 1) }
-                : {}
+                : isGhostCell(row - 1, col - 1)
+                  ? { backgroundColor: getGhostColor() }
+                  : {}
             "
           ></div>
         </div>
@@ -392,62 +466,88 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- 右侧信息 -->
+      <!-- 右侧信息 - 双列布局 -->
       <div class="game-info">
-        <el-card class="info-card">
-          <template #header>
-            <div class="card-header">
-              <el-icon><Medal /></el-icon>
-              <span>最高分</span>
-            </div>
-          </template>
-          <div class="info-value">{{ highScore }}</div>
-        </el-card>
+        <!-- 左侧列：分数信息 -->
+        <div class="info-column left-column">
+          <el-card class="info-card">
+            <template #header>
+              <div class="card-header">
+                <el-icon><Medal /></el-icon>
+                <span>最高分</span>
+              </div>
+            </template>
+            <div class="info-value">{{ highScore }}</div>
+          </el-card>
 
-        <el-card class="info-card">
-          <template #header>
-            <div class="card-header">
-              <el-icon><Timer /></el-icon>
-              <span>当前分数</span>
-            </div>
-          </template>
-          <div class="info-value">{{ score }}</div>
-        </el-card>
+          <el-card class="info-card">
+            <template #header>
+              <div class="card-header">
+                <el-icon><Timer /></el-icon>
+                <span>当前分数</span>
+              </div>
+            </template>
+            <div class="info-value">{{ score }}</div>
+          </el-card>
 
-        <el-card class="info-card">
-          <template #header>
-            <div class="card-header">
-              <el-icon><Timer /></el-icon>
-              <span>消除行数</span>
-            </div>
-          </template>
-          <div class="info-value">{{ lines }}</div>
-        </el-card>
+          <el-card class="info-card">
+            <template #header>
+              <div class="card-header">
+                <el-icon><Timer /></el-icon>
+                <span>消除行数</span>
+              </div>
+            </template>
+            <div class="info-value">{{ lines }}</div>
+          </el-card>
 
-        <el-card class="info-card">
-          <template #header>
-            <div class="card-header">
-              <el-icon><Timer /></el-icon>
-              <span>等级</span>
-            </div>
-          </template>
-          <div class="info-value">{{ level }}</div>
-        </el-card>
+          <el-card class="info-card">
+            <template #header>
+              <div class="card-header">
+                <el-icon><Timer /></el-icon>
+                <span>等级</span>
+              </div>
+            </template>
+            <div class="info-value">{{ level }}</div>
+          </el-card>
+        </div>
 
-        <el-card class="info-card controls-card">
-          <template #header>
-            <div class="card-header">操作说明</div>
-          </template>
-          <div class="controls-list">
-            <div class="control-item"><span class="key">↑</span> 旋转</div>
-            <div class="control-item">
-              <span class="key">←</span><span class="key">→</span> 左右移动
+        <!-- 右侧列：预览和操作说明 -->
+        <div class="info-column right-column">
+          <!-- 下一个方块预览 -->
+          <el-card class="info-card next-piece-card">
+            <template #header>
+              <div class="card-header">下一个</div>
+            </template>
+            <div class="next-piece-preview">
+              <div v-for="(row, rIndex) in 4" :key="rIndex" class="preview-row">
+                <div
+                  v-for="(col, cIndex) in 4"
+                  :key="cIndex"
+                  class="preview-cell"
+                  :style="{
+                    backgroundColor: getNextPieceCellColor(rIndex, cIndex),
+                    opacity: getNextPieceCellColor(rIndex, cIndex) ? 1 : 0
+                  }"
+                ></div>
+              </div>
             </div>
-            <div class="control-item"><span class="key">↓</span> 加速下落</div>
-            <div class="control-item"><span class="key">空格</span> 硬降到底</div>
-            <div class="control-item"><span class="key">P</span> 暂停</div>
-          </div>
-        </el-card>
+          </el-card>
+
+          <el-card class="info-card controls-card">
+            <template #header>
+              <div class="card-header">操作说明</div>
+            </template>
+            <div class="controls-list">
+              <div class="control-item"><span class="key">↑</span> 旋转</div>
+              <div class="control-item">
+                <span class="key">←</span><span class="key">→</span> 左右移动
+              </div>
+              <div class="control-item"><span class="key">↓</span> 加速下落</div>
+              <div class="control-item"><span class="key">空格</span> 硬降到底</div>
+              <div class="control-item"><span class="key">P</span> 暂停</div>
+            </div>
+          </el-card>
+        </div>
       </div>
     </div>
   </div>
@@ -458,6 +558,8 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   height: 100%;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .game-header {
@@ -469,28 +571,32 @@ onUnmounted(() => {
 
 .game-header h2 {
   margin: 0;
-  font-size: 24px;
+  font-size: 20px;
+  color: var(--el-text-color-primary);
 }
 
 .game-controls {
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 .game-content {
   display: flex;
-  gap: 30px;
+  gap: 24px;
   flex: 1;
+  justify-content: center;
+  align-items: flex-start;
 }
 
+/* 游戏面板 - 使用CSS变量适配主题 */
 .game-board {
   position: relative;
   display: flex;
   flex-direction: column;
-  background: #1a1a2e;
-  border: 3px solid #333;
-  border-radius: 4px;
-  padding: 2px;
+  background: var(--tetris-bg, #1a1a2e);
+  border: 2px solid var(--tetris-border, #3a3a5a);
+  border-radius: 6px;
+  padding: 3px;
 }
 
 .board-row {
@@ -498,21 +604,22 @@ onUnmounted(() => {
 }
 
 .board-cell {
-  width: 28px;
-  height: 28px;
-  border: 1px solid #2a2a4a;
-  background: #0f0f1a;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--tetris-cell-border, #2a2a4a);
+  background: var(--tetris-cell-bg, #0f0f1a);
+  transition: background-color 0.15s ease;
 }
 
 .board-cell.filled,
 .board-cell[class*='filled'] {
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.25);
 }
 
 .board-cell.preview {
-  opacity: 0.8;
-  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.3);
+  opacity: 0.85;
+  box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.35);
 }
 
 .game-overlay {
@@ -521,11 +628,11 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.75);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 2px;
+  border-radius: 4px;
 }
 
 .game-over {
@@ -534,9 +641,14 @@ onUnmounted(() => {
 }
 
 .game-over h3 {
-  font-size: 28px;
+  font-size: 24px;
   color: #f56c6c;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+}
+
+.game-over p {
+  margin: 8px 0 16px;
+  font-size: 16px;
 }
 
 .start-hint {
@@ -545,67 +657,146 @@ onUnmounted(() => {
 }
 
 .start-hint p {
-  margin: 5px 0;
+  margin: 6px 0;
+  font-size: 14px;
 }
 
 .controls-hint {
-  font-size: 12px;
-  color: #888;
+  font-size: 11px;
+  color: #aaa;
+  margin-top: 12px;
 }
 
+/* 右侧信息面板 - 双列布局 */
 .game-info {
   display: flex;
+  gap: 16px;
+  min-width: 360px;
+}
+
+.info-column {
+  display: flex;
   flex-direction: column;
-  gap: 15px;
-  min-width: 200px;
+  gap: 10px;
+  flex: 1;
+}
+
+.left-column {
+  max-width: 150px;
+}
+
+.right-column {
+  max-width: 180px;
 }
 
 .info-card {
   background: var(--el-bg-color);
+  border-radius: 8px;
+}
+
+.info-card :deep(.el-card__header) {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--el-border-color-light);
+}
+
+.info-card :deep(.el-card__body) {
+  padding: 16px;
 }
 
 .card-header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  font-size: 14px;
   font-weight: 500;
+  color: var(--el-text-color-primary);
 }
 
 .info-value {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: bold;
   text-align: center;
   color: var(--el-color-primary);
 }
 
-.controls-card .el-card__body {
-  padding: 10px 15px;
+.controls-card :deep(.el-card__body) {
+  padding: 12px 16px;
 }
 
 .controls-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  font-size: 13px;
+  gap: 10px;
+  font-size: 12px;
 }
 
 .control-item {
   display: flex;
   align-items: center;
   gap: 8px;
+  color: var(--el-text-color-regular);
 }
 
 .key {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 24px;
-  height: 24px;
+  min-width: 22px;
+  height: 22px;
   padding: 0 6px;
   background: var(--el-fill-color-light);
   border: 1px solid var(--el-border-color);
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
+  color: var(--el-text-color-primary);
+}
+
+/* 下一个方块预览样式 */
+.next-piece-card {
+  min-height: 140px;
+}
+
+.next-piece-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+  min-height: 90px;
+}
+
+.preview-row {
+  display: flex;
+}
+
+.preview-cell {
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--tetris-border, #3a3a5a);
+  border-radius: 3px;
+  margin: 1px;
+}
+
+/* 幽灵方块样式 */
+.board-cell.ghost {
+  border: 1px dashed rgba(255, 255, 255, 0.6);
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.25);
+}
+
+/* 浅色模式变量覆盖 */
+:root {
+  --tetris-bg: #f5f5f7;
+  --tetris-border: #dcdce6;
+  --tetris-cell-border: #e8e8ed;
+  --tetris-cell-bg: #fafafa;
+}
+
+/* 深色模式变量覆盖 */
+html.dark {
+  --tetris-bg: #1a1a2e;
+  --tetris-border: #3a3a5a;
+  --tetris-cell-border: #2a2a4a;
+  --tetris-cell-bg: #0f0f1a;
 }
 </style>
