@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute, useRouter, RouterView } from 'vue-router'
-import { useTheme } from './composables/useTheme'
+import { useThemeStore } from './stores/theme'
 import { Sunny, Moon, Monitor, Connection, Document, Folder, Grid } from '@element-plus/icons-vue'
 
-// 获取主题状态和切换方法
-const { themeMode, toggleTheme } = useTheme()
+// 使用 Pinia 主题 store
+const themeStore = useThemeStore()
 const route = useRoute()
 const router = useRouter()
 
 // 根据当前主题模式计算显示的图标
 const themeIcon = computed(() => {
-  switch (themeMode.value) {
+  switch (themeStore.themeMode) {
     case 'dark':
       return Moon
     case 'light':
@@ -23,7 +23,7 @@ const themeIcon = computed(() => {
 
 // 根据当前主题模式计算显示的文本
 const themeText = computed(() => {
-  switch (themeMode.value) {
+  switch (themeStore.themeMode) {
     case 'dark':
       return '深色'
     case 'light':
@@ -57,6 +57,11 @@ const gameTools = [{ name: '俄罗斯方块', path: '/tools/game/tetris' }]
 const navigateTo = (path: string): void => {
   router.push(path)
 }
+
+// 初始化主题
+onMounted(() => {
+  themeStore.initTheme()
+})
 </script>
 
 <template>
@@ -120,7 +125,7 @@ const navigateTo = (path: string): void => {
       </el-scrollbar>
 
       <div class="sidebar-footer">
-        <el-button class="theme-btn" :icon="themeIcon" @click="toggleTheme">
+        <el-button class="theme-btn" :icon="themeIcon" @click="themeStore.toggleTheme">
           {{ themeText }}
         </el-button>
       </div>

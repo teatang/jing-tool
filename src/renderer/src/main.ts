@@ -2,6 +2,7 @@
 import './assets/main.css'
 
 import { createApp } from 'vue'
+import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css'
@@ -11,6 +12,10 @@ import router from './router'
 
 // 创建 Vue 应用实例
 const app = createApp(App)
+
+// 创建并注册 Pinia
+const pinia = createPinia()
+app.use(pinia)
 
 // 注册所有 Element Plus 图标组件
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {

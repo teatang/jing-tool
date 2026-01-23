@@ -39,11 +39,12 @@
 ## 技术栈
 
 - **Electron** - 桌面应用框架
-- **Vue 3** - 前端框架（Composition API）
+- **Vue 3** - 前端框架（Composition API + Pinia 状态管理）
 - **TypeScript** - 类型安全
 - **Element Plus** - UI 组件库
 - **electron-vite** - 构建工具
 - **Vitest** - 单元测试
+- **Pinia** - 状态管理
 
 ## 项目初始化
 
@@ -108,8 +109,10 @@ src/
 ├── renderer/src/            # Vue 3 前端
 │   ├── App.vue              # 主应用布局
 │   ├── components/          # 公共组件
-│   ├── composables/         # Vue 组合式函数（useTheme 等）
+│   ├── composables/         # Vue 组合式函数
 │   ├── router/              # Vue Router 路由配置
+│   ├── stores/              # Pinia 状态管理
+│   │   └── theme.ts         # 主题状态存储
 │   ├── views/               # 页面组件
 │   │   ├── tools/
 │   │   │   ├── string/      # 字符串工具

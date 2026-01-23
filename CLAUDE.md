@@ -54,6 +54,7 @@ Three-part Electron structure:
 - **Element Plus** - Main UI component library
 - **Element Plus Icons Vue** - Icon components
 - **Mermaid** - Diagram rendering library (for Mermaid editor tool)
+- **Pinia** - State management (useThemeStore in `stores/theme.ts`)
 
 ## Testing
 
@@ -76,3 +77,4 @@ Three-part Electron structure:
 - Routes use hash mode (`createWebHashHistory`) for file:// protocol compatibility
 - String tool route: `/tools/string/mermaid` → Mermaid editor (MermaidTool.vue)
 - Game route: `/tools/game/tetris` → Tetris game (TetrisGame.vue)
+- Theme management: Use `useThemeStore` from `stores/theme.ts` (Pinia store) instead of deprecated `useTheme` composable
