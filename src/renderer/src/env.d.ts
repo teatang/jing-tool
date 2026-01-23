@@ -1,6 +1,26 @@
 /// <reference types="vite/client" />
 /// <reference types="vitest/globals" />
 
+// 常量文件类型声明
+declare module '@/constants/tetris' {
+  export const TETRIS_COLORS: {
+    I: string
+    O: string
+    T: string
+    S: string
+    Z: string
+    J: string
+    L: string
+    ghost: string
+  }
+  export const BOARD_COLORS: {
+    'board-light': string
+    'board-dark': string
+    'board-border-light': string
+    'board-border-dark': string
+  }
+}
+
 declare module '*.vue' {
   import type { DefineComponent } from 'vue'
   const component: DefineComponent<Record<string, unknown>, Record<string, unknown>, unknown>
