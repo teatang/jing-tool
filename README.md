@@ -12,6 +12,7 @@
 - **HTML 格式化** - HTML 带缩进格式化或压缩
 - **SQL 格式化** - SQL 代码格式化，支持关键字高亮和适当缩进
 - **正则测试** - 实时匹配测试正则表达式
+- **Mermaid 编辑器** - 编辑 Mermaid 语法并实时预览效果
 
 ### 文件工具
 
@@ -117,7 +118,8 @@ src/
 │   │   │   │   ├── JsonTool.vue
 │   │   │   │   ├── HtmlTool.vue
 │   │   │   │   ├── SqlTool.vue
-│   │   │   │   └── RegexTool.vue
+│   │   │   │   ├── RegexTool.vue
+│   │   │   │   └── MermaidTool.vue
 │   │   │   └── file/        # 文件工具
 │   │   │       ├── RenameTool.vue
 │   │   │       └── SearchTool.vue
@@ -139,6 +141,7 @@ src/
 - `/tools/string/html` → HTML 格式化
 - `/tools/string/sql` → SQL 格式化
 - `/tools/string/regex` → 正则测试
+- `/tools/string/mermaid` → Mermaid 编辑器
 - `/tools/file/rename` → 批量重命名
 - `/tools/file/search` → 文件搜索
 - `/tools/game/tetris` → 俄罗斯方块

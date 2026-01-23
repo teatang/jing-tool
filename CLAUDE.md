@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Cross-platform desktop tool collection built with Electron, Vue 3, and TypeScript.
 
-**String Tools**: Base64, URL, JSON, HTML, SQL formatting, Regex testing
+**String Tools**: Base64, URL, JSON, HTML, SQL formatting, Regex testing, Mermaid editor
 **File Tools**: Batch rename, File search
 **Game**: Tetris (7 tetromino shapes, next piece preview, ghost piece, score/level system, dark/light theme)
 
@@ -53,6 +53,7 @@ Three-part Electron structure:
 
 - **Element Plus** - Main UI component library
 - **Element Plus Icons Vue** - Icon components
+- **Mermaid** - Diagram rendering library (for Mermaid editor tool)
 
 ## Testing
 
@@ -73,4 +74,5 @@ Three-part Electron structure:
 - Theme CSS variables: `element-plus/theme-chalk/dark/css-vars.css`
 - File operations exposed via `window.api`: selectFolder, readDir, renameFile, batchRename, searchFiles, deleteFiles
 - Routes use hash mode (`createWebHashHistory`) for file:// protocol compatibility
+- String tool route: `/tools/string/mermaid` → Mermaid editor (MermaidTool.vue)
 - Game route: `/tools/game/tetris` → Tetris game (TetrisGame.vue)

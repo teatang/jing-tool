@@ -40,7 +40,8 @@ const stringTools = [
   { name: 'JSON格式化', path: '/tools/string/json' },
   { name: 'HTML格式化', path: '/tools/string/html' },
   { name: 'SQL格式化', path: '/tools/string/sql' },
-  { name: '正则测试', path: '/tools/string/regex' }
+  { name: '正则测试', path: '/tools/string/regex' },
+  { name: 'Mermaid编辑', path: '/tools/string/mermaid' }
 ]
 
 // 文件工具列表

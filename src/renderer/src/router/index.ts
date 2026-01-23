@@ -24,7 +24,8 @@ const router = createRouter({
         { path: 'json', component: () => import('@renderer/views/tools/string/JsonTool.vue') },
         { path: 'html', component: () => import('@renderer/views/tools/string/HtmlTool.vue') },
         { path: 'sql', component: () => import('@renderer/views/tools/string/SqlTool.vue') },
-        { path: 'regex', component: () => import('@renderer/views/tools/string/RegexTool.vue') }
+        { path: 'regex', component: () => import('@renderer/views/tools/string/RegexTool.vue') },
+        { path: 'mermaid', component: () => import('@renderer/views/tools/string/MermaidTool.vue') }
       ]
     },
     // 文件工具路由组
