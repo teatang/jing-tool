@@ -203,7 +203,8 @@ onUnmounted(() => {
               </template>
             </el-alert>
 
-            <!-- SVG 预览 -->
+            <!-- SVG 预览 - mermaid.render 返回的 SVG 是可信的 -->
+            <!-- eslint-disable-next-line vue/no-v-html -->
             <div v-if="svgContent" class="mermaid-preview" v-html="svgContent" />
 
             <!-- 空状态 -->

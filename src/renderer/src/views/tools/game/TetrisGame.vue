@@ -521,7 +521,7 @@ onUnmounted(() => {
             <div class="next-piece-preview">
               <div v-for="(_, rIndex) in 4" :key="rIndex" class="preview-row">
                 <div
-                  v-for="(_, cIndex) in 4"
+                  v-for="(__, cIndex) in 4"
                   :key="cIndex"
                   class="preview-cell"
                   :style="{
