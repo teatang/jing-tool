@@ -9,7 +9,8 @@ mermaid.initialize({
   startOnLoad: false,
   theme: 'default',
   securityLevel: 'loose',
-  fontFamily: 'inherit'
+  fontFamily: 'inherit',
+  suppressErrorRendering: true
 })
 
 const inputText = ref(
