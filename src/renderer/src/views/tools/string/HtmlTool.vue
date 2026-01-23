@@ -2,86 +2,12 @@
 import { ref } from 'vue'
 import { Minus, Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { formatHtml, minifyHtml } from '@/utils/stringTools'
 
 const inputText = ref('')
 const outputText = ref('')
 const formatType = ref<'format' | 'minify'>('format')
 const indentSize = ref(2)
-
-/**
- * HTML 格式化函数
- * 支持逐级缩进，处理自闭合标签和普通标签
- */
-const formatHtml = (html: string, indentSize: number = 2): string => {
-  const indent = ' '.repeat(indentSize)
-  let formatted = ''
-  let depth = 0
-
-  // 用于匹配标签的正则表达式
-  const tagRegex = /<[^>]+>/gi
-  let lastWasText = false
-
-  let match: RegExpExecArray | null
-  let lastIndex = 0
-
-  // 先清理输入，去除多余空白
-  html = html.replace(/\s+/g, ' ').trim()
-
-  while ((match = tagRegex.exec(html)) !== null) {
-    const fullMatch = match[0]
-    // 提取标签名
-    const tagNameMatch = fullMatch.match(/<([a-zA-Z][a-zA-Z0-9]*)/i)
-    const tagName = tagNameMatch ? tagNameMatch[1] : ''
-
-    const content = html.slice(lastIndex, match.index).trim()
-
-    // 处理文本内容（不缩进，保持原样）
-    if (content && !lastWasText) {
-      formatted += content
-      lastWasText = true
-    } else if (content && lastWasText) {
-      formatted += ' ' + content
-    }
-
-    const isClosingTag = fullMatch.startsWith('</')
-    const isSelfClosing =
-      fullMatch.endsWith('/>') ||
-      ['img', 'br', 'hr', 'input', 'meta', 'link'].includes(tagName.toLowerCase())
-    const isComment = fullMatch.startsWith('<!--')
-
-    if (isSelfClosing || isComment) {
-      // 自闭合标签或注释，添加到当前层级
-      formatted += '\n' + indent.repeat(depth) + fullMatch
-      lastWasText = false
-    } else if (isClosingTag) {
-      // 闭合标签，先减少缩进层级（与对应的开放标签对齐）
-      depth = Math.max(0, depth - 1)
-      formatted += '\n' + indent.repeat(depth) + fullMatch
-      lastWasText = false
-    } else {
-      // 开放标签，增加缩进层级后添加
-      formatted += '\n' + indent.repeat(depth) + fullMatch
-      depth++
-      lastWasText = false
-    }
-
-    lastIndex = tagRegex.lastIndex
-  }
-
-  // 处理剩余内容
-  const remaining = html.slice(lastIndex).trim()
-  if (remaining) {
-    formatted += remaining
-  }
-
-  // 清理：移除开头的换行，多个换行压缩为一个
-  formatted = formatted
-    .replace(/^\n+/, '')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim()
-
-  return formatted
-}
 
 const process = (): void => {
   if (!inputText.value.trim()) {
@@ -92,8 +18,7 @@ const process = (): void => {
   if (formatType.value === 'format') {
     outputText.value = formatHtml(inputText.value, indentSize.value)
   } else {
-    // HTML 压缩
-    outputText.value = inputText.value.replace(/\s+/g, ' ').replace(/>\s+</g, '><').trim()
+    outputText.value = minifyHtml(inputText.value)
   }
 }
 

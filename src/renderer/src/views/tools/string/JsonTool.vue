@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { Warning } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { formatJson } from '@/utils/stringTools'
 
 const inputText = ref('')
 const outputText = ref('')
@@ -15,18 +16,13 @@ const process = (): void => {
     return
   }
 
-  try {
-    const parsed = JSON.parse(inputText.value)
-    if (formatType.value === 'format') {
-      outputText.value = JSON.stringify(parsed, null, 2)
-    } else {
-      outputText.value = JSON.stringify(parsed)
-    }
-  } catch (e: unknown) {
-    const error = e as Error
-    errorMsg.value = error.message || 'JSON 语法错误'
+  const result = formatJson(inputText.value, formatType.value)
+  if (result.error) {
+    errorMsg.value = result.error
     outputText.value = ''
     ElMessage.error('JSON 格式错误')
+  } else {
+    outputText.value = result.result
   }
 }
 

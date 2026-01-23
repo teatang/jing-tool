@@ -1,11 +1,5 @@
-// Helper function to test Base64 encoding/decoding logic
-const processBase64 = (input: string, mode: 'encode' | 'decode'): string => {
-  if (mode === 'encode') {
-    return btoa(unescape(encodeURIComponent(input)))
-  } else {
-    return decodeURIComponent(escape(atob(input)))
-  }
-}
+import { describe, it, expect } from 'vitest'
+import { processBase64 } from '@/utils/stringTools'
 
 describe('Base64Tool', () => {
   describe('Base64 Encoding', () => {

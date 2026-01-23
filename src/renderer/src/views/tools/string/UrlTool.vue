@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { Link, Connection } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { processUrl } from '@/utils/stringTools'
 
 const inputText = ref('')
 const outputText = ref('')
@@ -9,11 +10,7 @@ const mode = ref<'encode' | 'decode'>('encode')
 
 const process = (): void => {
   try {
-    if (mode.value === 'encode') {
-      outputText.value = encodeURIComponent(inputText.value)
-    } else {
-      outputText.value = decodeURIComponent(inputText.value)
-    }
+    outputText.value = processUrl(inputText.value, mode.value)
   } catch {
     ElMessage.error('解码失败：输入内容不是有效的URL编码')
     outputText.value = ''

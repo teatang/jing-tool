@@ -1,11 +1,5 @@
-// Helper function to test URL encoding/decoding logic
-const processUrl = (input: string, mode: 'encode' | 'decode'): string => {
-  if (mode === 'encode') {
-    return encodeURIComponent(input)
-  } else {
-    return decodeURIComponent(input)
-  }
-}
+import { describe, it, expect } from 'vitest'
+import { processUrl } from '@/utils/stringTools'
 
 describe('UrlTool', () => {
   describe('URL Encoding', () => {

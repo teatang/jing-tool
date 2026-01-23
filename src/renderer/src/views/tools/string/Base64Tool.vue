@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { Lock, Unlock } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { processBase64 } from '@/utils/stringTools'
 
 // 输入和输出文本
 const inputText = ref('')
@@ -16,13 +17,7 @@ const mode = ref<'encode' | 'decode'>('encode')
  */
 const process = (): void => {
   try {
-    if (mode.value === 'encode') {
-      // 编码：使用浏览器原生 btoa 函数
-      outputText.value = btoa(inputText.value)
-    } else {
-      // 解码：使用浏览器原生 atob 函数
-      outputText.value = atob(inputText.value)
-    }
+    outputText.value = processBase64(inputText.value, mode.value)
   } catch {
     ElMessage.error('解码失败：输入内容不是有效的Base64编码')
     outputText.value = ''

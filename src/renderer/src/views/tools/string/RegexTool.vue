@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { Warning } from '@element-plus/icons-vue'
+import { testRegex, escapeHtml } from '@/utils/stringTools'
 
 const regexPattern = ref('')
 const testString = ref('')
@@ -49,20 +50,6 @@ const highlightedText = computed(() => {
 })
 
 /**
- * 转义 HTML 特殊字符
- */
-const escapeHtml = (text: string): string => {
-  const map: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;'
-  }
-  return text.replace(/[&<>"']/g, (m) => map[m])
-}
-
-/**
  * 执行正则匹配
  */
 const runRegex = (): void => {
@@ -75,30 +62,13 @@ const runRegex = (): void => {
     return
   }
 
-  try {
-    // flags 是数组，需要合并为字符串
-    const flagsString = flags.value.join('')
-    const regex = new RegExp(regexPattern.value, flagsString)
+  const result = testRegex(regexPattern.value, testString.value, flags.value)
 
-    // 收集所有匹配结果（包括位置信息）
-    const results: RegExpExecArray[] = []
-    let match: RegExpExecArray | null
-
-    // 使用 lastIndex 来遍历所有匹配
-    while ((match = regex.exec(testString.value)) !== null) {
-      results.push(match)
-      // 避免无限循环（对于零宽度匹配）
-      if (match.index === regex.lastIndex) {
-        regex.lastIndex++
-      }
-    }
-
-    // 使用新数组替换，确保响应式更新
-    matches.value = [...results]
-  } catch (e: unknown) {
-    const error = e as Error
-    errorMsg.value = error.message || '正则表达式错误'
+  if (result.error) {
+    errorMsg.value = result.error
     matches.value = []
+  } else {
+    matches.value = result.matches
   }
 }
 
