@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { Medal, Timer, Refresh, VideoPlay, VideoPause } from '@element-plus/icons-vue'
+import { TETRIS_COLORS } from '@/constants/tetris'
 
 // 游戏配置
 const BOARD_WIDTH = 10
@@ -47,15 +48,7 @@ const TETROMINOES = {
 }
 
 const SHAPES = ['I', 'O', 'T', 'S', 'Z', 'J', 'L']
-const COLORS = {
-  I: '#00f0f0',
-  O: '#f0f000',
-  T: '#a000f0',
-  S: '#00f000',
-  Z: '#f00000',
-  J: '#0000f0',
-  L: '#f0a000'
-}
+const COLORS = TETRIS_COLORS
 
 // 游戏状态
 const board = ref<string[][]>([])
@@ -432,13 +425,13 @@ onUnmounted(() => {
     <div class="flex-1 flex gap-6 justify-center items-start">
       <!-- 游戏面板 -->
       <div
-        class="game-board relative flex flex-col bg-gray-900 border-2 border-gray-700 rounded-lg p-1"
+        class="game-board relative flex flex-col bg-tetris-board-light dark:bg-tetris-board-dark border-2 border-tetris-board-border-light dark:border-tetris-board-border-dark rounded-lg p-1"
       >
         <div v-for="row in BOARD_HEIGHT" :key="row" class="flex">
           <div
             v-for="col in BOARD_WIDTH"
             :key="col"
-            class="w-[22px] h-[22px] border border-gray-700 bg-gray-800 transition-all duration-150"
+            class="w-[22px] h-[22px] border border-tetris-board-border-light dark:border-tetris-board-border-dark bg-tetris-board-light/50 dark:bg-tetris-board-dark/50 transition-all duration-150"
             :class="{
               filled: getCellColor(row - 1, col - 1),
               preview: isPieceCell(row - 1, col - 1),
@@ -552,7 +545,7 @@ onUnmounted(() => {
                 <div
                   v-for="(__, cIndex) in 4"
                   :key="cIndex"
-                  class="preview-cell w-[18px] h-[18px] border border-gray-600 dark:border-gray-500 rounded"
+                  class="preview-cell w-[18px] h-[18px] border border-tetris-board-border-light dark:border-tetris-board-border-dark rounded"
                   :style="{
                     backgroundColor: getNextPieceCellColor(rIndex, cIndex),
                     opacity: getNextPieceCellColor(rIndex, cIndex) ? 1 : 0
@@ -624,7 +617,7 @@ onUnmounted(() => {
 /* TailwindCSS already provides most styles, but we need some custom ones */
 
 .filled {
-  @apply border border-white/60 shadow-inner;
+  @apply border border-black/30 dark:border-white/60 shadow-inner;
 }
 
 .preview {
@@ -632,6 +625,6 @@ onUnmounted(() => {
 }
 
 .ghost {
-  @apply border border-dashed border-white/60 shadow-inner;
+  @apply border border-dashed border-black/30 dark:border-white/60 shadow-inner;
 }
 </style>

@@ -1,10 +1,10 @@
 {
   "name": "jing-tool",
-  "version": "0.1.1",
-  "description": "An Electron application with Vue and TypeScript",
+  "version": "0.2.1",
+  "description": "一款基于 Electron、Vue 3 和 TypeScript 构建的跨平台桌面工具集合应用。",
   "main": "./out/main/index.js",
   "author": "teatang",
-  "homepage": "https://electron-vite.org",
+  "homepage": "https://github.com/teatang/jing-tool",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint --cache .",
