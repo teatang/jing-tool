@@ -56,6 +56,24 @@ Three-part Electron structure:
 - **Mermaid** - Diagram rendering library (for Mermaid editor tool)
 - **Pinia** - State management (useThemeStore in `stores/theme.ts`)
 
+## CSS Framework
+
+- **TailwindCSS** - Utility-first CSS framework (v3.4)
+- **PostCSS** - CSS transformation with `autoprefixer`
+- Custom utility classes defined in `src/renderer/src/assets/main.css`:
+  - `.tool-page`, `.tool-header`, `.tool-title`, `.tool-desc`, `.tool-content`, `.tool-actions`
+  - `.textarea-container`, `.textarea-label`, `.editor-textarea`
+  - `.code-editor` - Monaco/Consolas font stack for code
+
+## CSS Conventions
+
+- Use TailwindCSS utility classes in templates for styling
+- Use `@apply` directive in `<style scoped>` for custom component styles
+- Custom colors defined in `tailwind.config.js`:
+  - Tetris piece colors: `tetris-I`, `tetris-O`, `tetris-T`, `tetris-S`, `tetris-Z`, `tetris-J`, `tetris-L`
+- Dark mode via `dark:` modifier (e.g., `dark:bg-gray-800`)
+- Theme colors: `bg-menu`, `bg-menu-hover`, `bg-page` (defined in Element Plus CSS variables)
+
 ## Testing
 
 - **Vitest** - Test framework

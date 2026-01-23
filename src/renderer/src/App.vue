@@ -65,15 +65,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <el-container class="app-container">
-    <el-aside width="220px" class="sidebar">
-      <div class="logo">
+  <el-container class="h-screen w-screen">
+    <el-aside
+      width="220px"
+      class="flex flex-col bg-menu border-r border-gray-200 dark:border-gray-700"
+    >
+      <div
+        class="h-15 flex items-center justify-center gap-2.5 text-lg font-semibold border-b border-gray-200 dark:border-gray-700"
+      >
         <el-icon :size="28"><Connection /></el-icon>
         <span>jing-tool</span>
       </div>
 
-      <el-scrollbar>
-        <el-menu :default-active="route.path" class="sidebar-menu">
+      <el-scrollbar class="flex-1">
+        <el-menu :default-active="route.path" class="border-r-0">
           <el-sub-menu index="string">
             <template #title>
               <el-icon><Document /></el-icon>
@@ -124,64 +129,21 @@ onMounted(() => {
         </el-menu>
       </el-scrollbar>
 
-      <div class="sidebar-footer">
-        <el-button class="theme-btn" :icon="themeIcon" @click="themeStore.toggleTheme">
+      <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+        <el-button class="w-full" :icon="themeIcon" @click="themeStore.toggleTheme">
           {{ themeText }}
         </el-button>
       </div>
     </el-aside>
 
-    <el-main class="main-content">
+    <el-main class="p-5 bg-page overflow-auto">
       <RouterView />
     </el-main>
   </el-container>
 </template>
 
 <style scoped>
-.app-container {
-  height: 100vh;
-  width: 100vw;
-}
-
-.sidebar {
-  background-color: var(--el-menu-bg-color);
-  border-right: 1px solid var(--el-border-color-light);
-  display: flex;
-  flex-direction: column;
-}
-
-.logo {
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-size: 18px;
-  font-weight: 600;
-  border-bottom: 1px solid var(--el-border-color-light);
-}
-
-.sidebar-menu {
-  flex: 1;
-  border-right: none;
-}
-
 .sidebar-menu :deep(.el-menu-item.is-active) {
   background-color: var(--el-menu-hover-bg-color);
-}
-
-.sidebar-footer {
-  padding: 16px;
-  border-top: 1px solid var(--el-border-color-light);
-}
-
-.theme-btn {
-  width: 100%;
-}
-
-.main-content {
-  padding: 20px;
-  background-color: var(--el-bg-color-page);
-  overflow: auto;
 }
 </style>

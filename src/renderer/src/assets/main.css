@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 * {
   margin: 0;
   padding: 0;
@@ -18,6 +22,11 @@ body {
   width: 100%;
 }
 
+/* Custom theme colors for Element Plus */
+.bg-menu-hover {
+  background-color: var(--el-menu-hover-bg-color);
+}
+
 /* Code editor styles */
 .code-editor {
   font-family: 'SF Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
@@ -28,62 +37,67 @@ body {
 
 /* Tool page styles */
 .tool-page {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+  @apply h-full flex flex-col;
 }
 
 .tool-header {
-  margin-bottom: 20px;
+  @apply mb-5;
 }
 
 .tool-title {
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 8px;
+  @apply text-2xl font-semibold mb-2;
 }
 
 .tool-desc {
-  color: var(--el-text-color-secondary);
-  font-size: 14px;
+  @apply text-sm text-gray-500 dark:text-gray-400;
 }
 
 .tool-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  @apply flex-1 flex flex-col gap-4;
 }
 
 .tool-actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+  @apply flex flex-wrap gap-3;
 }
 
 /* Textarea container */
 .textarea-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 200px;
+  @apply flex-1 flex flex-col min-h-[200px];
 }
 
 .textarea-label {
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 8px;
-  color: var(--el-text-color-primary);
+  @apply text-sm font-medium mb-2 text-gray-700 dark:text-gray-200;
 }
 
 .editor-textarea {
-  flex: 1;
-  resize: none;
-  font-family: 'SF Mono', 'Consolas', monospace;
-  font-size: 13px;
+  @apply flex-1 resize-none font-mono text-sm;
 }
 
 /* Result box */
 .result-box {
-  margin-top: 16px;
+  @apply mt-4;
+}
+
+/* Tetris specific styles */
+.tetris-cell {
+  @apply border border-gray-700 dark:border-gray-600;
+  width: 22px;
+  height: 22px;
+}
+
+.tetris-cell-filled {
+  @apply border border-white/50 shadow-inner;
+}
+
+.tetris-cell-ghost {
+  @apply border border-dashed border-white/60 shadow-inner;
+}
+
+/* Mermaid preview */
+.mermaid-preview {
+  @apply flex justify-center items-start overflow-auto;
+}
+
+.mermaid-preview :deep(svg) {
+  @apply max-w-full h-auto;
 }

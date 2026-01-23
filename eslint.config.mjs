@@ -33,7 +33,9 @@ export default defineConfig(
             lang: 'ts'
           }
         }
-      ]
+      ],
+      // v-html used for trusted content (mermaid SVG and escaped regex matches)
+      'vue/no-v-html': 'off'
     }
   },
   eslintConfigPrettier,

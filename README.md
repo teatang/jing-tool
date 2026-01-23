@@ -42,9 +42,12 @@
 - **Vue 3** - 前端框架（Composition API + Pinia 状态管理）
 - **TypeScript** - 类型安全
 - **Element Plus** - UI 组件库
+- **TailwindCSS** - 实用优先的 CSS 框架（v3.4）
+- **PostCSS** - CSS 转换工具（配合 autoprefixer）
 - **electron-vite** - 构建工具
 - **Vitest** - 单元测试
 - **Pinia** - 状态管理
+- **Mermaid** - 图表渲染库
 
 ## 项目初始化
 
@@ -113,6 +116,8 @@ src/
 │   ├── router/              # Vue Router 路由配置
 │   ├── stores/              # Pinia 状态管理
 │   │   └── theme.ts         # 主题状态存储
+│   ├── assets/              # 静态资源
+│   │   └── main.css         # TailwindCSS 入口和自定义工具类
 │   ├── views/               # 页面组件
 │   │   ├── tools/
 │   │   │   ├── string/      # 字符串工具
@@ -148,6 +153,76 @@ src/
 - `/tools/file/rename` → 批量重命名
 - `/tools/file/search` → 文件搜索
 - `/tools/game/tetris` → 俄罗斯方块
+
+## CSS 样式规范
+
+项目使用 TailwindCSS 作为 CSS 框架，采用实用优先的样式编写方式。
+
+### 配置文件
+
+- `tailwind.config.js` - TailwindCSS 配置（内容扫描路径、自定义颜色等）
+- `postcss.config.js` - PostCSS 配置（tailwindcss + autoprefixer）
+- `src/renderer/src/assets/main.css` - TailwindCSS 入口文件和自定义工具类
+
+### 自定义工具类
+
+在 `main.css` 中定义了项目通用的工具类：
+
+```css
+.tool-page      /* 页面容器：全高、flex 列布局 */
+.tool-header    /* 页面头部：底部间距 */
+.tool-title     /* 标题样式：2xl 字号、半粗体 */
+.tool-desc      /* 描述文本：灰色文字 */
+.tool-content   /* 内容区域：flex-1、flex 列布局、gap-4 */
+.tool-actions   /* 操作栏：flex 换行、gap-3 */
+.textarea-container  /* 文本域容器：flex-1、flex 列 */
+.textarea-label      /* 文本域标签：14px 字号、中等字重 */
+.editor-textarea     /* 编辑器文本域：flex-1、resize-none、等宽字体 */
+```
+
+### 使用方式
+
+```vue
+<!-- 模板中使用 TailwindCSS 实用类 -->
+<div class="flex items-center gap-4 p-4 bg-white dark:bg-gray-800">
+  <span class="text-sm font-medium text-gray-700 dark:text-gray-200">标题</span>
+</div>
+
+<!-- 自定义组件样式使用 @apply -->
+<style scoped>
+.custom-component {
+  @apply flex flex-col gap-2 p-4 border border-gray-200 dark:border-gray-700;
+}
+</style>
+```
+
+### 自定义颜色
+
+在 `tailwind.config.js` 中定义了俄罗斯方块方块颜色：
+
+```js
+colors: {
+  tetris: {
+    I: '#00f0f0',  // 青色
+    O: '#f0f000',  // 黄色
+    T: '#a000f0',  // 紫色
+    S: '#00f000',  // 绿色
+    Z: '#f00000',  // 红色
+    J: '#0000f0',  // 蓝色
+    L: '#f0a000'   // 橙色
+  }
+}
+```
+
+### 深色模式
+
+使用 `dark:` 前缀支持深色模式：
+
+```vue
+<div class="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200">
+  内容
+</div>
+```
 
 ## IPC 通信
 

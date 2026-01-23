@@ -163,8 +163,8 @@ const canRename = computed((): boolean => {
     </div>
 
     <div class="tool-content">
-      <div class="path-selector">
-        <el-input v-model="currentPath" placeholder="选择文件夹路径" readonly style="flex: 1">
+      <div class="flex gap-3 mb-4">
+        <el-input v-model="currentPath" placeholder="选择文件夹路径" readonly class="flex-1">
           <template #append>
             <el-button @click="selectFolder">
               <el-icon><Folder /></el-icon>
@@ -178,7 +178,7 @@ const canRename = computed((): boolean => {
         </el-button>
       </div>
 
-      <div v-if="currentPath" class="file-toolbar">
+      <div v-if="currentPath" class="flex justify-between items-center mb-3">
         <el-checkbox
           :model-value="selectedFiles.size === files.length && files.length > 0"
           :indeterminate="selectedFiles.size > 0 && selectedFiles.size < files.length"
@@ -200,18 +200,18 @@ const canRename = computed((): boolean => {
         </el-table-column>
         <el-table-column label="名称" min-width="300">
           <template #default="{ row }">
-            <div class="file-name-cell">
-              <el-icon v-if="row.isDirectory" class="folder-icon">
+            <div class="flex items-center gap-2">
+              <el-icon v-if="row.isDirectory" class="text-amber-500 text-lg">
                 <Folder />
               </el-icon>
-              <el-icon v-else class="file-icon">
+              <el-icon v-else class="text-blue-500 text-lg">
                 <Document />
               </el-icon>
               <template v-if="row.editing">
                 <el-input
                   v-model="row.newName"
                   size="small"
-                  style="width: 200px"
+                  class="w-50"
                   @keyup.enter="saveEdit(row)"
                 />
                 <el-button
@@ -235,34 +235,3 @@ const canRename = computed((): boolean => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.path-selector {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.file-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.file-name-cell {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.folder-icon {
-  color: #e6a23c;
-  font-size: 18px;
-}
-
-.file-icon {
-  color: #409eff;
-  font-size: 18px;
-}
-</style>

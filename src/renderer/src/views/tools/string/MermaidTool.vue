@@ -150,8 +150,8 @@ onUnmounted(() => {
 
     <div class="tool-content">
       <!-- 示例快捷入口 -->
-      <div class="examples-bar">
-        <span class="examples-label">示例：</span>
+      <div class="flex items-center gap-2.5 flex-wrap mb-4">
+        <span class="text-sm text-gray-500 dark:text-gray-400">示例：</span>
         <el-button
           v-for="example in examples"
           :key="example.name"
@@ -163,17 +163,17 @@ onUnmounted(() => {
         <el-button size="small" :icon="Refresh" @click="refreshRender">刷新</el-button>
       </div>
 
-      <div class="editor-container">
+      <div class="flex-1 flex gap-5 min-h-0">
         <!-- 左侧编辑区 -->
-        <div class="editor-section">
-          <div class="section-header">
-            <span class="section-title">Mermaid 语法</span>
+        <div class="flex-1 flex flex-col min-w-0">
+          <div class="flex justify-between items-center mb-2.5">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Mermaid 语法</span>
             <el-button size="small" @click="clear">清空</el-button>
           </div>
           <el-input
             v-model="inputText"
             type="textarea"
-            class="mermaid-editor"
+            class="flex-1 font-mono text-sm"
             :rows="15"
             placeholder="在此输入 Mermaid 语法..."
             @input="debouncedRender"
@@ -181,19 +181,21 @@ onUnmounted(() => {
         </div>
 
         <!-- 右侧预览区 -->
-        <div class="preview-section">
-          <div class="section-header">
-            <span class="section-title">预览效果</span>
+        <div class="flex-[1.2] flex flex-col min-w-0">
+          <div class="flex justify-between items-center mb-2.5">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-200">预览效果</span>
             <el-tag v-if="svgContent" type="success" size="small">
               <el-icon><CircleCheck /></el-icon>
               渲染成功
             </el-tag>
           </div>
-          <div class="preview-container">
+          <div
+            class="flex-1 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 overflow-auto p-4 flex flex-col"
+          >
             <!-- 错误提示 -->
-            <el-alert v-if="errorMsg" type="error" :closable="false" class="error-alert">
+            <el-alert v-if="errorMsg" type="error" :closable="false" class="mb-4">
               <template #title>
-                <div class="error-content">
+                <div class="flex items-center gap-2">
                   <el-icon><Warning /></el-icon>
                   <span>{{ errorMsg }}</span>
                 </div>
@@ -204,16 +206,25 @@ onUnmounted(() => {
             </el-alert>
 
             <!-- SVG 预览 - mermaid.render 返回的 SVG 是可信的 -->
-            <!-- eslint-disable-next-line vue/no-v-html -->
-            <div v-if="svgContent" class="mermaid-preview" v-html="svgContent" />
+            <div
+              v-if="svgContent"
+              class="mermaid-preview flex-1 flex justify-center items-start overflow-auto"
+              v-html="svgContent"
+            />
 
             <!-- 空状态 -->
-            <div v-else-if="!errorMsg && !isRendering" class="empty-state">
+            <div
+              v-else-if="!errorMsg && !isRendering"
+              class="flex-1 flex items-center justify-center text-sm text-gray-500 dark:text-gray-400"
+            >
               <p>输入 Mermaid 语法后将在此显示预览</p>
             </div>
 
             <!-- 加载状态 -->
-            <div v-if="isRendering" class="loading-state">
+            <div
+              v-if="isRendering"
+              class="flex-1 flex items-center justify-center gap-2.5 text-sm text-gray-500 dark:text-gray-400"
+            >
               <el-icon class="is-loading"><Refresh /></el-icon>
               <span>渲染中...</span>
             </div>
@@ -225,145 +236,9 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-.tool-page {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.tool-header {
-  margin-bottom: 20px;
-}
-
-.tool-title {
-  margin: 0 0 8px;
-  font-size: 20px;
-  color: var(--el-text-color-primary);
-}
-
-.tool-desc {
-  margin: 0;
-  font-size: 14px;
-  color: var(--el-text-color-secondary);
-}
-
-.tool-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.examples-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-
-.examples-label {
-  font-size: 14px;
-  color: var(--el-text-color-secondary);
-}
-
-.editor-container {
-  display: flex;
-  gap: 20px;
-  flex: 1;
-  min-height: 0;
-}
-
-.editor-section,
-.preview-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.section-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-}
-
-.mermaid-editor {
-  flex: 1;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  font-size: 13px;
-}
-
-.mermaid-editor :deep(.el-textarea__inner) {
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  line-height: 1.6;
-}
-
-.preview-section {
-  flex: 1.2;
-}
-
-.preview-container {
-  flex: 1;
-  border: 1px solid var(--el-border-color);
-  border-radius: 6px;
-  background: var(--el-bg-color);
-  overflow: auto;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-}
-
-.error-alert {
-  margin-bottom: 16px;
-}
-
-.error-content {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.mermaid-preview {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  overflow: auto;
-}
-
+/* Custom styles for mermaid editor */
 .mermaid-preview :deep(svg) {
   max-width: 100%;
   height: auto;
-}
-
-.empty-state {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--el-text-color-secondary);
-  font-size: 14px;
-}
-
-.loading-state {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  color: var(--el-text-color-secondary);
-  font-size: 14px;
-}
-
-.loading-state .el-icon {
-  font-size: 20px;
 }
 </style>

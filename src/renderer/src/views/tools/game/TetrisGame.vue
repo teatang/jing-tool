@@ -410,10 +410,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="tetris-container">
-    <div class="game-header">
-      <h2>俄罗斯方块</h2>
-      <div class="game-controls">
+  <div class="tetris-container p-5 h-full box-border flex flex-col">
+    <div class="flex justify-between items-center mb-5">
+      <h2 class="m-0 text-xl text-gray-700 dark:text-gray-100">俄罗斯方块</h2>
+      <div class="flex gap-2">
         <el-button v-if="!isPlaying" type="primary" :icon="VideoPlay" @click="startGame">
           开始游戏
         </el-button>
@@ -429,14 +429,16 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <div class="game-content">
+    <div class="flex-1 flex gap-6 justify-center items-start">
       <!-- 游戏面板 -->
-      <div class="game-board">
-        <div v-for="row in BOARD_HEIGHT" :key="row" class="board-row">
+      <div
+        class="game-board relative flex flex-col bg-gray-900 border-2 border-gray-700 rounded-lg p-1"
+      >
+        <div v-for="row in BOARD_HEIGHT" :key="row" class="flex">
           <div
             v-for="col in BOARD_WIDTH"
             :key="col"
-            class="board-cell"
+            class="w-[22px] h-[22px] border border-gray-700 bg-gray-800 transition-all duration-150"
             :class="{
               filled: getCellColor(row - 1, col - 1),
               preview: isPieceCell(row - 1, col - 1),
@@ -453,77 +455,104 @@ onUnmounted(() => {
         </div>
 
         <!-- 游戏遮罩 -->
-        <div v-if="!isPlaying || gameOver" class="game-overlay">
-          <div v-if="gameOver" class="game-over">
-            <h3>游戏结束</h3>
-            <p>得分: {{ score }}</p>
-            <el-button type="primary" @click="startGame">再来一局</el-button>
+        <div
+          v-if="!isPlaying || gameOver"
+          class="game-overlay absolute inset-0 bg-black/75 flex items-center justify-center rounded-lg"
+        >
+          <div v-if="gameOver" class="text-center text-white">
+            <h3 class="text-2xl text-red-500 mb-3">游戏结束</h3>
+            <p class="m-2 text-base">得分: {{ score }}</p>
+            <el-button type="primary" class="mt-4" @click="startGame">再来一局</el-button>
           </div>
-          <div v-else class="start-hint">
-            <p>按 Enter 或点击开始</p>
-            <p class="controls-hint">↑ 旋转 | ← → 移动 | ↓ 加速 | 空格 硬降 | P 暂停</p>
+          <div v-else class="start-hint text-center text-white">
+            <p class="my-1.5 text-sm">按 Enter 或点击开始</p>
+            <p class="controls-hint text-xs text-gray-400 mt-3">
+              ↑ 旋转 | ← → 移动 | ↓ 加速 | 空格 硬降 | P 暂停
+            </p>
           </div>
         </div>
       </div>
 
       <!-- 右侧信息 - 双列布局 -->
-      <div class="game-info">
+      <div class="game-info flex gap-4 min-w-[360px]">
         <!-- 左侧列：分数信息 -->
-        <div class="info-column left-column">
-          <el-card class="info-card">
+        <div class="info-column flex-1 flex flex-col gap-2.5 max-w-[144px]">
+          <el-card class="info-card bg-white dark:bg-gray-800 rounded-lg">
             <template #header>
-              <div class="card-header">
+              <div
+                class="card-header flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-200"
+              >
                 <el-icon><Medal /></el-icon>
                 <span>最高分</span>
               </div>
             </template>
-            <div class="info-value">{{ highScore }}</div>
+            <div class="info-value text-center text-2xl font-bold text-primary-500">
+              {{ highScore }}
+            </div>
           </el-card>
 
-          <el-card class="info-card">
+          <el-card class="info-card bg-white dark:bg-gray-800 rounded-lg">
             <template #header>
-              <div class="card-header">
+              <div
+                class="card-header flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-200"
+              >
                 <el-icon><Timer /></el-icon>
                 <span>当前分数</span>
               </div>
             </template>
-            <div class="info-value">{{ score }}</div>
+            <div class="info-value text-center text-2xl font-bold text-primary-500">
+              {{ score }}
+            </div>
           </el-card>
 
-          <el-card class="info-card">
+          <el-card class="info-card bg-white dark:bg-gray-800 rounded-lg">
             <template #header>
-              <div class="card-header">
+              <div
+                class="card-header flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-200"
+              >
                 <el-icon><Timer /></el-icon>
                 <span>消除行数</span>
               </div>
             </template>
-            <div class="info-value">{{ lines }}</div>
+            <div class="info-value text-center text-2xl font-bold text-primary-500">
+              {{ lines }}
+            </div>
           </el-card>
 
-          <el-card class="info-card">
+          <el-card class="info-card bg-white dark:bg-gray-800 rounded-lg">
             <template #header>
-              <div class="card-header">
+              <div
+                class="card-header flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-200"
+              >
                 <el-icon><Timer /></el-icon>
                 <span>等级</span>
               </div>
             </template>
-            <div class="info-value">{{ level }}</div>
+            <div class="info-value text-center text-2xl font-bold text-primary-500">
+              {{ level }}
+            </div>
           </el-card>
         </div>
 
         <!-- 右侧列：预览和操作说明 -->
-        <div class="info-column right-column">
+        <div class="info-column flex-1 flex flex-col gap-2.5 max-w-[180px]">
           <!-- 下一个方块预览 -->
-          <el-card class="info-card next-piece-card">
+          <el-card class="next-piece-card min-h-[140px] bg-white dark:bg-gray-800 rounded-lg">
             <template #header>
-              <div class="card-header">下一个</div>
+              <div
+                class="card-header flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-200"
+              >
+                下一个
+              </div>
             </template>
-            <div class="next-piece-preview">
-              <div v-for="(_, rIndex) in 4" :key="rIndex" class="preview-row">
+            <div
+              class="next-piece-preview flex flex-col items-center justify-center py-2 min-h-[88px]"
+            >
+              <div v-for="(_, rIndex) in 4" :key="rIndex" class="preview-row flex">
                 <div
                   v-for="(__, cIndex) in 4"
                   :key="cIndex"
-                  class="preview-cell"
+                  class="preview-cell w-[18px] h-[18px] border border-gray-600 dark:border-gray-500 rounded"
                   :style="{
                     backgroundColor: getNextPieceCellColor(rIndex, cIndex),
                     opacity: getNextPieceCellColor(rIndex, cIndex) ? 1 : 0
@@ -533,18 +562,56 @@ onUnmounted(() => {
             </div>
           </el-card>
 
-          <el-card class="info-card controls-card">
+          <el-card class="controls-card bg-white dark:bg-gray-800 rounded-lg">
             <template #header>
-              <div class="card-header">操作说明</div>
-            </template>
-            <div class="controls-list">
-              <div class="control-item"><span class="key">↑</span> 旋转</div>
-              <div class="control-item">
-                <span class="key">←</span><span class="key">→</span> 左右移动
+              <div
+                class="card-header flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-200"
+              >
+                操作说明
               </div>
-              <div class="control-item"><span class="key">↓</span> 加速下落</div>
-              <div class="control-item"><span class="key">空格</span> 硬降到底</div>
-              <div class="control-item"><span class="key">P</span> 暂停</div>
+            </template>
+            <div
+              class="controls-list flex flex-col gap-2.5 text-xs text-gray-600 dark:text-gray-400"
+            >
+              <div class="control-item flex items-center gap-2">
+                <span
+                  class="key inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-xs font-medium"
+                  >↑</span
+                >
+                旋转
+              </div>
+              <div class="control-item flex items-center gap-2">
+                <span
+                  class="key inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-xs font-medium"
+                  >←</span
+                >
+                <span
+                  class="key inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-xs font-medium"
+                  >→</span
+                >
+                左右移动
+              </div>
+              <div class="control-item flex items-center gap-2">
+                <span
+                  class="key inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-xs font-medium"
+                  >↓</span
+                >
+                加速下落
+              </div>
+              <div class="control-item flex items-center gap-2">
+                <span
+                  class="key inline-flex items-center justify-center min-w-14 h-[22px] px-1.5 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-xs font-medium"
+                  >空格</span
+                >
+                硬降到底
+              </div>
+              <div class="control-item flex items-center gap-2">
+                <span
+                  class="key inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-xs font-medium"
+                  >P</span
+                >
+                暂停
+              </div>
             </div>
           </el-card>
         </div>
@@ -554,249 +621,17 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-.tetris-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  padding: 20px;
-  box-sizing: border-box;
+/* TailwindCSS already provides most styles, but we need some custom ones */
+
+.filled {
+  @apply border border-white/60 shadow-inner;
 }
 
-.game-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+.preview {
+  @apply opacity-85 shadow-inner;
 }
 
-.game-header h2 {
-  margin: 0;
-  font-size: 20px;
-  color: var(--el-text-color-primary);
-}
-
-.game-controls {
-  display: flex;
-  gap: 8px;
-}
-
-.game-content {
-  display: flex;
-  gap: 24px;
-  flex: 1;
-  justify-content: center;
-  align-items: flex-start;
-}
-
-/* 游戏面板 - 使用CSS变量适配主题 */
-.game-board {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  background: var(--tetris-bg, #1a1a2e);
-  border: 2px solid var(--tetris-border, #3a3a5a);
-  border-radius: 6px;
-  padding: 3px;
-}
-
-.board-row {
-  display: flex;
-}
-
-.board-cell {
-  width: 22px;
-  height: 22px;
-  border: 1px solid var(--tetris-cell-border, #2a2a4a);
-  background: var(--tetris-cell-bg, #0f0f1a);
-  transition: background-color 0.15s ease;
-}
-
-.board-cell.filled,
-.board-cell[class*='filled'] {
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.25);
-}
-
-.board-cell.preview {
-  opacity: 0.85;
-  box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.35);
-}
-
-.game-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.75);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-}
-
-.game-over {
-  text-align: center;
-  color: #fff;
-}
-
-.game-over h3 {
-  font-size: 24px;
-  color: #f56c6c;
-  margin-bottom: 12px;
-}
-
-.game-over p {
-  margin: 8px 0 16px;
-  font-size: 16px;
-}
-
-.start-hint {
-  text-align: center;
-  color: #fff;
-}
-
-.start-hint p {
-  margin: 6px 0;
-  font-size: 14px;
-}
-
-.controls-hint {
-  font-size: 11px;
-  color: #aaa;
-  margin-top: 12px;
-}
-
-/* 右侧信息面板 - 双列布局 */
-.game-info {
-  display: flex;
-  gap: 16px;
-  min-width: 360px;
-}
-
-.info-column {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  flex: 1;
-}
-
-.left-column {
-  max-width: 150px;
-}
-
-.right-column {
-  max-width: 180px;
-}
-
-.info-card {
-  background: var(--el-bg-color);
-  border-radius: 8px;
-}
-
-.info-card :deep(.el-card__header) {
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--el-border-color-light);
-}
-
-.info-card :deep(.el-card__body) {
-  padding: 16px;
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-}
-
-.info-value {
-  font-size: 24px;
-  font-weight: bold;
-  text-align: center;
-  color: var(--el-color-primary);
-}
-
-.controls-card :deep(.el-card__body) {
-  padding: 12px 16px;
-}
-
-.controls-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  font-size: 12px;
-}
-
-.control-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--el-text-color-regular);
-}
-
-.key {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 6px;
-  background: var(--el-fill-color-light);
-  border: 1px solid var(--el-border-color);
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--el-text-color-primary);
-}
-
-/* 下一个方块预览样式 */
-.next-piece-card {
-  min-height: 140px;
-}
-
-.next-piece-preview {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 0;
-  min-height: 90px;
-}
-
-.preview-row {
-  display: flex;
-}
-
-.preview-cell {
-  width: 18px;
-  height: 18px;
-  border: 1px solid var(--tetris-border, #3a3a5a);
-  border-radius: 3px;
-  margin: 1px;
-}
-
-/* 幽灵方块样式 */
-.board-cell.ghost {
-  border: 1px dashed rgba(255, 255, 255, 0.6);
-  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.25);
-}
-
-/* 浅色模式变量覆盖 */
-:root {
-  --tetris-bg: #f5f5f7;
-  --tetris-border: #dcdce6;
-  --tetris-cell-border: #e8e8ed;
-  --tetris-cell-bg: #fafafa;
-}
-
-/* 深色模式变量覆盖 */
-html.dark {
-  --tetris-bg: #1a1a2e;
-  --tetris-border: #3a3a5a;
-  --tetris-cell-border: #2a2a4a;
-  --tetris-cell-bg: #0f0f1a;
+.ghost {
+  @apply border border-dashed border-white/60 shadow-inner;
 }
 </style>

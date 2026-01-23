@@ -120,8 +120,8 @@ const clearSearch = (): void => {
     </div>
 
     <div class="tool-content">
-      <div class="search-config">
-        <el-input v-model="searchPath" placeholder="选择搜索文件夹" readonly style="flex: 1">
+      <div class="flex flex-wrap gap-3 mb-4">
+        <el-input v-model="searchPath" placeholder="选择搜索文件夹" readonly class="flex-1">
           <template #append>
             <el-button @click="selectFolder">
               <el-icon><Folder /></el-icon>
@@ -132,7 +132,7 @@ const clearSearch = (): void => {
         <el-input
           v-model="keyword"
           placeholder="输入文件名关键词"
-          style="width: 300px"
+          class="w-75"
           @keyup.enter="searchFiles"
         />
         <el-button type="primary" :loading="searching" @click="searchFiles">
@@ -142,7 +142,7 @@ const clearSearch = (): void => {
         <el-button @click="clearSearch">清空</el-button>
       </div>
 
-      <div v-if="results.length > 0" class="result-toolbar">
+      <div v-if="results.length > 0" class="flex justify-between items-center mb-3">
         <el-checkbox
           :model-value="results.length > 0 && results.every((r) => r.selected)"
           :indeterminate="results.some((r) => r.selected) && !results.every((r) => r.selected)"
@@ -164,8 +164,8 @@ const clearSearch = (): void => {
         </el-table-column>
         <el-table-column label="文件名" min-width="250">
           <template #default="{ row }">
-            <div class="file-cell">
-              <el-icon class="file-icon"><Document /></el-icon>
+            <div class="flex items-center gap-2">
+              <el-icon class="text-blue-500 text-lg"><Document /></el-icon>
               {{ row.name }}
             </div>
           </template>
@@ -177,30 +177,3 @@ const clearSearch = (): void => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.search-config {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-
-.result-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.file-cell {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.file-icon {
-  color: #409eff;
-  font-size: 18px;
-}
-</style>

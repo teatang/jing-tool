@@ -131,11 +131,11 @@ const matchCount = (): number => {
     </div>
 
     <div class="tool-content">
-      <div class="regex-config">
-        <el-input v-model="regexPattern" placeholder="输入正则表达式，如: \w+" style="flex: 2">
+      <div class="flex flex-wrap gap-3 items-center">
+        <el-input v-model="regexPattern" placeholder="输入正则表达式，如: \w+" class="flex-[2]">
           <template #prepend>正则</template>
         </el-input>
-        <el-select v-model="flags" multiple placeholder="标志" style="width: 200px">
+        <el-select v-model="flags" multiple placeholder="标志" class="w-50">
           <el-option
             v-for="item in flagsOptions"
             :key="item.value"
@@ -146,7 +146,7 @@ const matchCount = (): number => {
         <el-button @click="clear">清空</el-button>
       </div>
 
-      <div v-if="errorMsg" class="error-box">
+      <div v-if="errorMsg" class="mb-2.5">
         <el-alert type="error" :closable="false">
           <template #title>
             <el-icon><Warning /></el-icon>
@@ -162,25 +162,33 @@ const matchCount = (): number => {
           type="textarea"
           :rows="6"
           placeholder="在此输入测试文本"
-          class="test-input"
+          class="font-mono text-sm"
         />
-        <div v-if="matches.length > 0" class="highlight-preview">
-          <div class="highlight-label">高亮预览</div>
-          <!-- eslint-disable-next-line vue/no-v-html -->
-          <div class="highlight-content" v-html="highlightedText"></div>
+        <div v-if="matches.length > 0" class="mt-3">
+          <div class="text-xs text-gray-500 dark:text-gray-400 mb-1.5">高亮预览</div>
+          <div
+            class="border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 p-3 font-mono text-sm leading-relaxed break-all whitespace-pre-wrap min-h-[60px]"
+            v-html="highlightedText"
+          ></div>
         </div>
       </div>
 
-      <div class="match-result">
-        <div class="match-header">
-          <span>匹配结果：{{ matchCount() }} 个匹配</span>
-        </div>
-        <div class="matches-textarea">
-          <div v-for="(match, index) in matches" :key="index" class="match-line">
-            <span class="match-line-number">{{ index + 1 }}.</span>
-            <span class="match-line-content">{{ match[0] }}</span>
+      <div class="mt-2.5">
+        <div class="font-medium mb-2">匹配结果：{{ matchCount() }} 个匹配</div>
+        <div
+          class="border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 min-h-36 max-h-75 overflow-y-auto p-3 font-mono text-sm"
+        >
+          <div
+            v-for="(match, index) in matches"
+            :key="index"
+            class="flex items-start py-1 border-b border-gray-100 dark:border-gray-700 last:border-0"
+          >
+            <span class="text-gray-500 dark:text-gray-400 w-9 flex-shrink-0">{{ index + 1 }}.</span>
+            <span class="break-all">{{ match[0] }}</span>
           </div>
-          <div v-if="matches.length === 0" class="match-empty">匹配结果将显示在这里</div>
+          <div v-if="matches.length === 0" class="text-gray-400 dark:text-gray-500 italic">
+            匹配结果将显示在这里
+          </div>
         </div>
       </div>
     </div>
@@ -188,95 +196,6 @@ const matchCount = (): number => {
 </template>
 
 <style scoped>
-.regex-config {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.error-box {
-  margin-bottom: 10px;
-}
-
-.match-result {
-  margin-top: 10px;
-}
-
-.match-header {
-  margin-bottom: 8px;
-  font-weight: 500;
-}
-
-.matches-textarea {
-  border: 1px solid var(--el-border-color);
-  border-radius: 4px;
-  background: var(--el-fill-color-blank);
-  min-height: 144px;
-  max-height: 300px;
-  overflow-y: auto;
-  padding: 8px 12px;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  font-size: 14px;
-  color: var(--el-text-color-primary);
-}
-
-.match-line {
-  display: flex;
-  align-items: flex-start;
-  padding: 4px 0;
-  border-bottom: 1px solid var(--el-border-color-lighter);
-}
-
-.match-line:last-child {
-  border-bottom: none;
-}
-
-.match-line-number {
-  color: var(--el-text-color-secondary);
-  min-width: 36px;
-  margin-right: 8px;
-  flex-shrink: 0;
-}
-
-.match-line-content {
-  word-break: break-all;
-}
-
-.match-empty {
-  color: var(--el-text-color-placeholder);
-  font-style: italic;
-}
-
-.test-input {
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  font-size: 14px;
-}
-
-.highlight-preview {
-  margin-top: 12px;
-}
-
-.highlight-label {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-  margin-bottom: 6px;
-}
-
-.highlight-content {
-  border: 1px solid var(--el-border-color);
-  border-radius: 4px;
-  background: var(--el-fill-color-blank);
-  padding: 12px;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--el-text-color-primary);
-  white-space: pre-wrap;
-  word-break: break-all;
-  min-height: 60px;
-}
-
 /* 交替高亮颜色 - 颜色1（黄色系） */
 :deep(.match-highlight-1) {
   background-color: rgba(255, 193, 7, 0.7);

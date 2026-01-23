@@ -60,7 +60,7 @@ const copyResult = async (): Promise<void> => {
         <el-button type="primary" @click="process">处理</el-button>
       </div>
 
-      <div v-if="errorMsg" class="error-box">
+      <div v-if="errorMsg" class="mb-2.5">
         <el-alert type="error" :closable="false">
           <template #title>
             <el-icon><Warning /></el-icon>
@@ -96,9 +96,3 @@ const copyResult = async (): Promise<void> => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.error-box {
-  margin-bottom: 10px;
-}
-</style>
